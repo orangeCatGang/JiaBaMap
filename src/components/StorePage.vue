@@ -27,9 +27,9 @@ onUnmounted(() => {
 <template>
     <div class="overflow-x-scroll">
         <!-- 頁頭（導航欄） -->
-        <header class="p-2 flex justify-between items-center space-x-4 border-b-[1px] border-orange-200">
+        <header class="p-2 flex justify-between items-center flex-wrap space-y-2 md:space-y-0 space-x-4 border-b border-orange-200">
             <!-- LOGO -->
-            <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="min-w-[130px] w-[130px]"></a>
+            <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></a>
             <!-- 搜尋欄容器 -->
             <div class="hidden md:flex items-center px-4 bg-white rounded-full shadow-sm border border-gray-200 space-x-2 h-11 ml-52 " >
                 <input
@@ -123,26 +123,26 @@ onUnmounted(() => {
         </div>
         
         <!-- 導航標籤 -->
-        <nav class="bg-white  px-6 flex items-center space-x-4 shadow">
-            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500">總覽</button>
-            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500">照片</button>
-            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500">菜單</button>
-            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500">評論</button>
-            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500">更多餐廳</button>
+        <nav class="bg-white px-4 flex overflow-x-auto md:overflow-visible items-center space-x-4 shadow">
+            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500 whitespace-nowrap">總覽</button>
+            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500 whitespace-nowrap">照片</button>
+            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500 whitespace-nowrap">菜單</button>
+            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500 whitespace-nowrap">評論</button>
+            <button class="text-amber-500 font-bold py-4 px-4  border-b-2 border-transparent hover:border-amber-500 whitespace-nowrap">更多餐廳</button>
         </nav>
         <!-- 店家資訊區 -->
-        <div class=" w-full max-w-[1054px] mx-auto bg-white mt-14 px-6 py-3">
-            <div class="flex items-center space-x-4">
+        <div class="w-full max-w-[1024px] mx-auto bg-white mt-14 px-4 md:px-6 py-4">
+            <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-4">
                 <img src="https://lh3.googleusercontent.com/UlqveEhj9MUgmNDR3hi8C6PV4rk5mhPA_KFpn--Px3IwiYmO-_Qhfrwhq5RYNW2t1oKSgzXj-Y8TZepKVjXAKLwrqLByobwYW-tP22EH3dQ=s200" alt="Store Thumbnail" class=" w-40 h-32 rounded-lg object-cover">
-                <div class="space-y-1">
+                <div class="space-y-2 text-center md:text-left">
                     <h2 class="text-3xl font-black text-gray-700">和牛涮 日式鍋物放題 台南中華西店</h2>
                     <h3 class="pl-6 font-bold text-gray-500">“王品集團旗下日式鍋物放題，千元有找就能盡情享用頂級和牛，還有豐富的自助吧、和牛咖哩和冰淇淋，讓你飽餐一頓！”</h3>
-                    <div class="flex items-center mt-2 space-x-2">
+                    <div class="flex flex-wrap justify-center md:justify-start items-center mt-2 gap-2">
                         <span class="text-yellow-500">4.8 ★</span>
                         <span class="text-gray-600">6 則評論</span>
                         <a href="#"><span class="bg-blue-100 text-blue-500 px-2 py-1 rounded">觀看菜單</span></a>
                     </div>
-                    <div class=" flex gap-2 py-2">
+                    <div class="flex flex-wrap gap-2 justify-center md:justify-start py-2">
                         <a class=" text-black rounded">均消 $900</a>
                         <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                         <a href="#" class="hover:text-amber-500">火鍋</a>
@@ -204,7 +204,7 @@ onUnmounted(() => {
             </div>
         </div>
         <!-- 頁尾 -->
-        <footer class="bg-amber-500 text-white py-6 px-4">
+        <footer class="bg-amber-500 text-white py-6 px-4 text-center md:text-left">
             <div class="container mx-auto w-[70%] flex flex-col md:flex-row  justify-between">
                 <!-- 第一欄 -->
                 <div class="mb-8 md:mb-0">
@@ -248,5 +248,13 @@ onUnmounted(() => {
 /* 如果需要自定義一些額外樣式可以在這裡加入 */
 .absolute {
     position: absolute;
+}
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+    }
+    .hidden {
+        display: none !important;
+    }
 }
 </style>
