@@ -26,17 +26,17 @@ onUnmounted(() => {
 
 <template>
     <!-- 頁頭（導航欄） -->
-    <header class="bg-white p-4 flex justify-between items-center space-x-4">
+    <header class="p-2 flex justify-between items-center space-x-4 border-b-[1px] border-orange-200">
         <!-- LOGO -->
-        <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="h-14"></a>
+        <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="min-w-[130px] w-[130px]"></a>
         <!-- 搜尋欄容器 -->
-        <div class="flex items-center px-4 bg-white rounded-full shadow-lg border border-gray-300 space-x-2 h-11 ml-52" >
+        <div class="hidden md:flex items-center px-4 bg-white rounded-full shadow-sm border border-gray-200 space-x-2 h-11 ml-52 " >
             <input
             type="text"
             v-model="keyword" 
             id="keyword"
             placeholder="美食分類、餐廳"
-            class=" flex-1 px-4 py-2 rounded-full outline-none text-gray-600 placeholder-gray-400"
+            class=" flex-1  py-2 outline-none text-gray-600 placeholder-gray-400 "
             />
 
             <!-- 餐具圖標 -->
@@ -46,7 +46,7 @@ onUnmounted(() => {
             
             <!-- 城市選擇按鈕 -->
             <div class="flex items-center space-x-1 bg-amber-100 text-amber-500 rounded-full px-3 py-1">
-                <span>台南市</span>
+                <span class=" min-w-16">台南市</span>
                 <button class="text-sm focus:outline-none">&times;</button>
             </div>
 
@@ -60,12 +60,12 @@ onUnmounted(() => {
         </div>
         <!-- 主選單 -->
         <div class="hidden md:flex items-center space-x-4">
-            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2">發表食記</a>
-            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2">專欄文章</a>
+            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">發表食記</a>
+            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">專欄文章</a>
 
             <!-- 店家專區的下拉選單 -->
             <div class="relative group inline-block text-left">
-                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none">
+                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none min-w-20">
                     店家專區
                     <span>&#x25BC;</span>
                 </button>
@@ -80,7 +80,7 @@ onUnmounted(() => {
 
             <!-- 排行榜的下拉選單 -->
             <div class="relative group inline-block text-left">
-                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none">
+                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none min-w-20">
                     排行榜
                     <span>&#x25BC;</span>
                 </button>
@@ -95,6 +95,7 @@ onUnmounted(() => {
 
         <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
         <div class="md:hidden flex items-center space-x-4">
+            <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="text-amber-500 w-5 h-5" /></a>
             <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
             <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
             </button>
@@ -142,21 +143,21 @@ onUnmounted(() => {
     <div class=" w-full max-w-[1054px] mx-auto bg-white mt-14 px-6 py-3">
         <div class="flex items-center space-x-4">
             <img src="https://lh3.googleusercontent.com/UlqveEhj9MUgmNDR3hi8C6PV4rk5mhPA_KFpn--Px3IwiYmO-_Qhfrwhq5RYNW2t1oKSgzXj-Y8TZepKVjXAKLwrqLByobwYW-tP22EH3dQ=s200" alt="Store Thumbnail" class=" w-40 h-32 rounded-lg object-cover">
-            <div>
-                <h2 class="text-3xl font-black text-gray-700">和牛涮台南中華西店</h2>
+            <div class="space-y-1">
+                <h2 class="text-3xl font-black text-gray-700">和牛涮 日式鍋物放題 台南中華西店</h2>
                 <h3 class="pl-6 font-bold text-gray-500">“王品集團旗下日式鍋物放題，千元有找就能盡情享用頂級和牛，還有豐富的自助吧、和牛咖哩和冰淇淋，讓你飽餐一頓！”</h3>
                 <div class="flex items-center mt-2 space-x-2">
                     <span class="text-yellow-500">4.8 ★</span>
                     <span class="text-gray-600">6 則評論</span>
-                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded">觀看菜單</span>
+                    <a href="#"><span class="bg-blue-100 text-blue-500 px-2 py-1 rounded">觀看菜單</span></a>
                 </div>
-                <div class=" flex gap-2 py-1">
+                <div class=" flex gap-2 py-2">
                     <a class=" text-black rounded">均消 $900</a>
-                    <a href="#" class="text-blue-700 rounded">找相似餐廳</a>
-                    <a href="#">火鍋</a>
-                    <a href="#">日本料理</a>
-                    <a href="#">咖哩</a>
-                    <a href="#">合菜</a>
+                    <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
+                    <a href="#" class="hover:text-amber-500">火鍋</a>
+                    <a href="#" class="hover:text-amber-500">日本料理</a>
+                    <a href="#" class="hover:text-amber-500">咖哩</a>
+                    <a href="#" class="hover:text-amber-500">合菜</a>
                 </div>
             </div>
         </div>
@@ -164,10 +165,10 @@ onUnmounted(() => {
         <div class="flex items-center mt-10 space-x-4">
             <div>
                 <img src="../assets/logo.jpg" alt="Store Thumbnail" class="w-40 rounded-lg object-cover">
-                <button class=" bg-gray-100 rounded-lg p-2 mt-20">google評價</button>
+                <button class=" bg-gray-100 text-gray-500 rounded-lg p-2 mt-20">google評價</button>
             </div>
-            <div>
-                <h4 class="text-2xl font-bold">營業時間 11:30 - 23:30</h4>
+            <div class="space-y-1">
+                <h4 class="text-2xl font-bold py-1">營業時間 11:30 - 23:30</h4>
                 <p>店家地址|臺南市安平區中華西路二段345號</p>
                 <p>均消價位| $900</p>
                 <p>臉書頁面|和牛涮台南中華西店</p>
@@ -217,41 +218,38 @@ onUnmounted(() => {
 
     <!-- 頁尾 -->
     <footer class="bg-amber-500 text-white py-6 px-4">
-        <div class="container mx-auto" style="max-width: calc(100% - 468px);">
-            <div class="flex flex-col md:flex-row justify-between">
-                <!-- 第一欄 -->
-                <div class="mb-8 md:mb-0">
-                    <h4 class="font-bold mb-4">相關連結</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:underline">愛食記粉絲專頁</a></li>
-                        <li><a href="#" class="hover:underline">Instagram</a></li>
-                        <li><a href="#" class="hover:underline">聯絡我們</a></li>
-                        <li><a href="#" class="hover:underline">服務條款</a></li>
-                        <li><a href="#" class="hover:underline">隱私政策</a></li>
-                    </ul>
-                </div>
+        <div class="container mx-auto w-[70%] flex flex-col md:flex-row justify-center">
+            <!-- 第一欄 -->
+            <div class="mb-8 md:mb-0 w-[364px]">
+                <h4 class="font-bold mb-4">相關連結</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:underline">愛食記粉絲專頁</a></li>
+                    <li><a href="#" class="hover:underline">Instagram</a></li>
+                    <li><a href="#" class="hover:underline">聯絡我們</a></li>
+                    <li><a href="#" class="hover:underline">服務條款</a></li>
+                    <li><a href="#" class="hover:underline">隱私政策</a></li>
+                </ul>
+            </div>
 
-                <!-- 第二欄 -->
-                <div class="mb-8 md:mb-0">
-                    <h4 class="font-bold mb-4">愛食記應用程式</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:underline">iOS App</a></li>
-                        <li><a href="#" class="hover:underline">Android App</a></li>
-                    </ul>
-                </div>
+            <!-- 第二欄 -->
+            <div class="mb-8 md:mb-0 w-[364px]">
+                <h4 class="font-bold mb-4">愛食記應用程式</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:underline">iOS App</a></li>
+                    <li><a href="#" class="hover:underline">Android App</a></li>
+                </ul>
+            </div>
 
-                <!-- 第三欄 -->
-                <div>
-                    <h4 class="font-bold mb-4">店家專區</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:underline">如何加入愛食記？</a></li>
-                        <li><a href="#" class="hover:underline">聯繫部落客</a></li>
-                    </ul>
-                    <p class="text-gray-400 text-sm mt-4">v: 1.8.3, 67</p>
-                </div>
+            <!-- 第三欄 -->
+            <div>
+                <h4 class="font-bold mb-4">店家專區</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:underline">如何加入愛食記？</a></li>
+                    <li><a href="#" class="hover:underline">聯繫部落客</a></li>
+                </ul>
+                <p class="text-gray-400 text-sm mt-4">v: 1.8.3, 67</p>
             </div>
         </div>
-
         <!-- 底部版權 -->
         <div class="text-center mt-4 text-gray-400">
             <p>Copyright © Tsunami Works 2013-2024 ❤️</p>
