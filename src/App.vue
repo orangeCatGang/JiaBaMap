@@ -9,6 +9,8 @@ import Search from './components/Search.vue';
     <!-- <Places/> -->
     <RouterView />
   </header>
-
+  <div id="app">
+    <router-view /> 
+  </div>
 </template>
 
