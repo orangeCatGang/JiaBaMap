@@ -56,7 +56,7 @@ onUnmounted(() => {
                 </button>
             </div>
             <!-- 主選單 -->
-            <div class="hidden md:flex items-center space-x-4">
+            <div class="md:flex items-center space-x-4 main-menu">
                 <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">發表食記</a>
                 <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">專欄文章</a>
                 <!-- 店家專區的下拉選單 -->
@@ -88,7 +88,7 @@ onUnmounted(() => {
                 </div>
             </div>
             <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
-            <div class="md:hidden flex items-center space-x-4">
+            <div class="md:hidden flex items-center space-x-4 hamburger-menu">
                 <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="text-amber-500 w-5 h-5" /></a>
                 <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
                 <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
@@ -249,12 +249,28 @@ onUnmounted(() => {
 .absolute {
     position: absolute;
 }
+
 @media (max-width: 768px) {
     header {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
     .hidden {
         display: none !important;
+    }
+    .main-menu {
+        display: none; /* 小於等於 768px 隱藏主選單 */
+    }
+    .hamburger-menu {
+        display: flex; /* 小於等於 768px 顯示漢堡選單 */
+    }
+}
+
+@media (min-width: 769px) {
+    .main-menu {
+        display: flex; /* 大於等於 769px 顯示主選單 */
+    }
+    .hamburger-menu {
+        display: none; /* 大於等於 769px 隱藏漢堡選單 */
     }
 }
 </style>
