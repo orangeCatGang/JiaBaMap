@@ -26,7 +26,6 @@ const {
     storePhoto,
 } = storeToRefs(restaurantStore);
 
-import StoreComment from '../components/storeComment/StoreComment.vue'
 </script>
 
 
