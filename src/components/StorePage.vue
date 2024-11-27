@@ -1,6 +1,20 @@
 <script setup>
 import { ref } from 'vue';
 import StoreComment from '../components/storeComment/StoreComment.vue'
+
+const isDropdownVisible = ref(false);
+
+// 用於點擊頁面其他地方時隱藏下拉選單
+function handleDocumentClick(event) {
+    const button = document.getElementById('dropdownButton');
+    const menu = document.getElementById('dropdownMenu');
+
+    if (!button.contains(event.target) && !menu.contains(event.target)) {
+        isDropdownVisible.value = false;
+    }
+}
+
+document.addEventListener('click', handleDocumentClick);
 </script>
 
 
@@ -26,14 +40,12 @@ import StoreComment from '../components/storeComment/StoreComment.vue'
         <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
             <img src="https://lh3.googleusercontent.com/UlqveEhj9MUgmNDR3hi8C6PV4rk5mhPA_KFpn--Px3IwiYmO-_Qhfrwhq5RYNW2t1oKSgzXj-Y8TZepKVjXAKLwrqLByobwYW-tP22EH3dQ=s200" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg ">
             <div class="space-y-2 text-center md:text-left">
-                <h2 class="text-3xl font-black text-gray-700">和牛涮 日式鍋物放題 台南中華西店</h2>
-                <h3 class="pl-6 font-bold text-gray-500">“王品集團旗下日式鍋物放題，千元有找就能盡情享用頂級和牛，還有豐富的自助吧、和牛咖哩和冰淇淋，讓你飽餐一頓！”</h3>
-                <div class="flex flex-wrap items-center justify-center gap-2 mt-2 md:justify-start">
-                    <span class="text-yellow-500">4.8 ★</span>
-                    <span class="text-gray-600">6 則評論</span>
-                    <a href="#"><span class="px-2 py-1 text-blue-500 bg-blue-100 rounded">觀看菜單</span></a>
+                <h2 class="text-3xl font-black py-1 text-gray-700">和牛涮 日式鍋物放題 台南中華西店</h2>
+                <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
+                    <span class=" px-2 py-1 text-yellow-50 bg-amber-500 rounded">4.8 ★</span>
+                    <a href="#"><span class="text-gray-400">6 則評論</span></a>
                 </div>
-                <div class="flex flex-wrap justify-center gap-2 py-2 md:justify-start">
+                <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
                     <a class="text-black rounded ">均消 $900</a>
                     <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                     <a href="#" class="hover:text-amber-500">火鍋</a>
@@ -47,51 +59,63 @@ import StoreComment from '../components/storeComment/StoreComment.vue'
         <div class="flex items-center mt-10 space-x-4">
             <div>
                 <img src="../assets/logo.jpg" alt="Store Thumbnail" class="object-cover w-40 rounded-lg">
-                <button class="p-2 mt-20 text-gray-500 bg-gray-100 rounded-lg ">google評價</button>
             </div>
-            <div class="space-y-1">
-                <h4 class="py-1 text-2xl font-bold">營業時間 11:30 - 23:30</h4>
+            <div class="space-y-2">
+                <div class="relative inline-block ml-12">
+                    <button 
+                    id="dropdownButton" 
+                    class="text-amber-500 rounded-md p-2 hover:bg-amber-100 focus:outline-none font-bold"
+                    @click="isDropdownVisible = !isDropdownVisible">
+                        現正營業 : 11:30 - 23:30
+                        <span class="ml-1">&#x25BC;</span>
+                    </button>
+                    <div 
+                    id="dropdownMenu" 
+                    v-if="isDropdownVisible"
+                    class="absolute w-48  bg-white rounded-md shadow-lg z-10 left-1/2 transform -translate-x-1/2"
+                    >
+                        <ul class="mt-1">
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期一 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期二 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期三 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期四 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期五 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">星期六 11:30 - 23:30</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">星期日 11:30 - 23:30</a></li>
+                        </ul>
+                    </div>
+                </div>
                 <p>店家地址 | 臺南市安平區中華西路二段345號</p>
                 <p>均消價位 | $900</p>
-                <p>臉書頁面 | 和牛涮台南中華西店</p>
                 <p>訂位電話 | 062959677</p>
-                <p>您是餐廳老闆？想要更多行銷服務請至 店家專區</p>
-    
-                <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'calendar-week']" class="w-5 h-5 mr-2 text-amber-500" />線上訂位</button>
-                <button class="p-2 mt-6 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'arrow-up-from-bracket']" class="w-5 h-5 mr-2 text-amber-500"/>分享餐廳</button>
+                <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'calendar-week']" class="w-5 h-5 mr-2 text-amber-500" />相關連結</button>
+                <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'arrow-up-from-bracket']" class="w-5 h-5 mr-2 text-amber-500"/>分享餐廳</button>
+                <button class="p-2 mt-6 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'arrow-up-from-bracket']" class="w-5 h-5 mr-2 text-amber-500"/>google評價</button>
             </div>
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
-            <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的最新照片 1483張</h3>
-        </div>
-        <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
-            <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的菜單</h3>
-        </div>
-        <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的用戶評論</h3>
             <StoreComment />
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的相似餐廳</h3>
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的其他推薦餐廳</h3>
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">🔍 搜尋更多相關主題</h3>
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的食記</h3>
         </div>
         <!-- 地圖區域 -->
-        <div class="mt-4 text-gray-700">
+        <div class="mt-10 text-gray-700">
             <h3 class="mb-2 text-2xl font-bold">熱門餐廳分類</h3>
         </div>
     </div>
