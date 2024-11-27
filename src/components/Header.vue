@@ -68,7 +68,7 @@ onUnmounted(() => {
                     <ul class="mt-2">
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+                    <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">邀請部落客</a></li>
                     </ul>
                 </div>
             </div>
@@ -81,7 +81,7 @@ onUnmounted(() => {
                 <div class="absolute hidden group-hover:block mt-0 w-48 bg-white rounded-md shadow-lg z-10">
                     <ul class="mt-2">
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+                    <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">月排行</a></li>
                     </ul>
                 </div>
             </div>

@@ -6,9 +6,23 @@ import Footer from './components/Footer.vue'; // 引入 Footer 組件
 
 <template>
     <Header />
-    <div class="overflow-x-scroll">
+    <div class="overflow-x-auto hide-scrollbar">
       <RouterView />
       <Footer />
     </div>
 </template>
+
+<style scoped>
+/* 隱藏滾動條 */
+.hide-scrollbar {
+  overflow-x: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+</style>
+
 

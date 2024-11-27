@@ -10,27 +10,27 @@ import { ref } from 'vue';
             <div class="mb-8 md:mb-0">
                 <h4 class="font-bold mb-4">相關連結</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="hover:underline">愛食記粉絲專頁</a></li>
-                    <li><a href="#" class="hover:underline">Instagram</a></li>
-                    <li><a href="#" class="hover:underline">聯絡我們</a></li>
-                    <li><a href="#" class="hover:underline">服務條款</a></li>
-                    <li><a href="#" class="hover:underline">隱私政策</a></li>
+                    <li><a href="#" class="custom-underline">愛食記粉絲專頁</a></li>
+                    <li><a href="#" class="custom-underline">Instagram</a></li>
+                    <li><a href="#" class="custom-underline">聯絡我們</a></li>
+                    <li><a href="#" class="custom-underline">服務條款</a></li>
+                    <li><a href="#" class="custom-underline">隱私政策</a></li>
                 </ul>
             </div>
             <!-- 第二欄 -->
             <div class="mb-8 md:mb-0">
                 <h4 class="font-bold mb-4">愛食記應用程式</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="hover:underline">iOS App</a></li>
-                    <li><a href="#" class="hover:underline">Android App</a></li>
+                    <li><a href="#" class="custom-underline">iOS App</a></li>
+                    <li><a href="#" class="custom-underline">Android App</a></li>
                 </ul>
             </div>
             <!-- 第三欄 -->
             <div>
                 <h4 class="font-bold mb-4">店家專區</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="hover:underline">如何加入愛食記？</a></li>
-                    <li><a href="#" class="hover:underline">聯繫部落客</a></li>
+                    <li><a href="#" class="custom-underline">如何加入愛食記？</a></li>
+                    <li><a href="#" class="custom-underline">聯繫部落客</a></li>
                 </ul>
                 <p class="text-gray-400 text-sm mt-4">v: 1.8.3, 67</p>
             </div>
@@ -43,5 +43,8 @@ import { ref } from 'vue';
 </template>
 
 <style scoped>
-
+.custom-underline:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px; /* 你可以調整這個值來改變底線的距離 */
+}
 </style>
