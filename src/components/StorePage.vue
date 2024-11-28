@@ -70,7 +70,7 @@ document.addEventListener('click', handleDocumentClick);
                     <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                 </div>
                 <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
-                    <a class="text-black rounded ">{{ `${startPrice}-${endPrice}` }}</a>
+                    <a class="text-black rounded ">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
                     <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                     <a href="#" class="hover:text-amber-500">火鍋</a>
                     <a href="#" class="hover:text-amber-500">日本料理</a>
@@ -90,7 +90,7 @@ document.addEventListener('click', handleDocumentClick);
                     id="dropdownButton" 
                     class="text-amber-500 rounded-md p-2 hover:bg-amber-100 focus:outline-none font-bold"
                     @click="isDropdownVisible = !isDropdownVisible">
-                        現正營業 : 11:30 - 23:30
+                    {{ openNow? "目前營業中":"目前休息中" }}
                         <span class="ml-1">&#x25BC;</span>
                     </button>
                     <div 
@@ -99,18 +99,18 @@ document.addEventListener('click', handleDocumentClick);
                     class="absolute w-48  bg-white rounded-md shadow-lg z-10 left-1/2 transform -translate-x-1/2"
                     >
                         <ul class="mt-1">
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ openNow? "營業中":"休息中" }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions }}</a></li>
-                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekdayDescriptions }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[0] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[1] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[2] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[3] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[4] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[5] }}</a></li>
+                        <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekdayDescriptions[6] }}</a></li>
                         </ul>
                     </div>
                 </div>
                 <p>店家地址 | {{ formattedAddress }}</p>
-                <p>均消價位 | {{ `${startPrice}-${endPrice}` }}</p>
+                <p>均消價位 | {{ `${startPrice}-${endPrice}` }}元</p>
                 <p>訂位電話 | {{ nationalPhoneNumber }}</p>
                 <a :href="websiteUri">
                     <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'calendar-week']" class="w-5 h-5 mr-2 text-amber-500" />相關連結</button>
