@@ -1,12 +1,28 @@
-<script setup>
+<script>
 import Header from './components/Header.vue'; // 引入 Header 組件
 import Footer from './components/Footer.vue'; // 引入 Footer 組件
+import RestaurantCard from './components/RestaurantCard.vue';
+import MapComponent from './components/MapComponent.vue';
+import FilterBar from './components/FilterBar.vue';
+
+
+export default {
+  components: {
+    Header,
+    FilterBar,
+    RestaurantCard,
+    MapComponent,
+    Footer,
+  },
+};
 
 </script>
 
 <template>
     <Header />
     <div class="overflow-x-auto hide-scrollbar">
+      <!-- <RestaurantCard /> -->
+      <!-- <MapComponent/> -->
       <RouterView />
       <Footer />
     </div>

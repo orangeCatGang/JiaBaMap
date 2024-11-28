@@ -1,4 +1,4 @@
-<script setup>
+<script>
 import { ref, onMounted, onUnmounted} from 'vue';
 
 const isMenuOpen = ref(false);
@@ -21,6 +21,117 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('resize', checkScreenWidth);
 });
+
+import loader from "./googleMapsLoader.js"; // 引入共享的 Google Maps Loader
+import RestaurantCard from "./RestaurantCard.vue";
+import MapComponent from "./MapComponent.vue";
+
+export default {
+  components: {
+      RestaurantCard,
+      MapComponent,
+  },
+  data() {
+    return {
+      keyword: "", // 用戶輸入的關鍵字 (例如：餐廳)
+      selectedDistrict: "大安區", // 預設行政區為大安區
+      sortOrder: "default", // 預設排序方式
+      districts: {
+        "中正區": { lat: 25.032404, lng: 121.519033 },
+        "大同區": { lat: 25.063093, lng: 121.513305 },
+        "中山區": { lat: 25.0685, lng: 121.5266 },
+        "松山區": { lat: 25.0585, lng: 121.5585 },
+        "大安區": { lat: 25.033976, lng: 121.543459 },
+        "萬華區": { lat: 25.0354, lng: 121.4997 },
+        "信義區": { lat: 25.0306, lng: 121.5701 },
+        "士林區": { lat: 25.0922, lng: 121.5245 },
+        "北投區": { lat: 25.1321, lng: 121.4987 },
+        "內湖區": { lat: 25.083, lng: 121.5868 },
+        "南港區": { lat: 25.0553, lng: 121.6171 },
+        "文山區": { lat: 24.9987, lng: 121.5549 },
+      }, // 各行政區的中心經緯度
+      places: [], // 搜尋結果
+      searched: false, // 是否已進行搜尋
+    };
+  },
+  computed: {
+    sortedPlaces() {
+      if (this.sortOrder === "distance") {
+        return this.places.sort((a, b) => a.distance - b.distance);
+      } else if (this.sortOrder === "rating") {
+        return this.places.sort((a, b) => b.rating - a.rating);
+      } else {
+        return this.places; // 預設順序
+      }
+    },
+  },
+  methods: {
+    async searchPlaces() {
+      this.places = []; // 清空舊的搜尋結果
+      this.searched = false;
+
+      if (!this.keyword.trim()) {
+        alert("請輸入有效的關鍵字！");
+        return;
+      }
+
+      const { lat, lng } = this.districts[this.selectedDistrict]; // 根據選擇的行政區獲取經緯度
+
+      // 使用共享的 Google Maps Loader
+      await loader.load();
+
+      const service = new google.maps.places.PlacesService(
+        document.createElement("div")
+      );
+
+      const request = {
+        location: new google.maps.LatLng(lat, lng), // 使用選擇的行政區經緯度
+        radius: 1000, // 搜尋半徑 (公尺)
+        keyword: this.keyword, // 使用用戶輸入的關鍵字
+      };
+
+      service.nearbySearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          // 計算每個地點到中心點的距離
+          this.places = results.map((place) => ({
+            ...place,
+            distance: this.calculateDistance(
+              lat,
+              lng,
+              place.geometry.location.lat(),
+              place.geometry.location.lng()
+            ),
+            photo:
+              place.photos && place.photos[0]
+                ? place.photos[0].getUrl({ maxWidth: 400 })
+                : null, // 獲取第一張圖片
+          }));
+        } else {
+          console.error("搜尋失敗，狀態：", status);
+        }
+
+        
+        this.searched = true;
+      });
+    },
+    calculateDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371; // 地球半徑（公里）
+      const dLat = this.degToRad(lat2 - lat1);
+      const dLng = this.degToRad(lng2 - lng1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.degToRad(lat1)) *
+          Math.cos(this.degToRad(lat2)) *
+          Math.sin(dLng / 2) *
+          Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // 距離（公里）
+    },
+    degToRad(deg) {
+      return deg * (Math.PI / 180);
+    },
+  },
+};
 </script>
 
 
@@ -44,13 +155,18 @@ onUnmounted(() => {
     
             <!-- 城市選擇按鈕 -->
             <div class="flex items-center space-x-1 bg-amber-100 text-amber-500 rounded-full px-3 py-1">
-                <span class=" min-w-16">台南市</span>
-                <button class="text-sm focus:outline-none">&times;</button>
+                <!-- <span class=" min-w-16">台南市</span>
+                <button class="text-sm focus:outline-none">&times;</button> -->
+                <select v-model="selectedDistrict" id="district">
+                    <option v-for="(coords, district) in districts" :key="district" :value="district">
+                      {{ district }}
+                    </option>
+                  </select>
             </div>
             <!-- 地點圖標 -->
             <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="text-amber-500 w-5 h-5" />
             <!-- 搜索按鈕 -->
-            <button class="bg-amber-500 text-white py-1 px-4 rounded-full shadow-md focus:outline-none ml-52">
+            <button class="bg-amber-500 text-white py-1 px-4 rounded-full shadow-md focus:outline-none ml-52" @click="searchPlaces">
                 <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
             </button>
         </div>
@@ -113,6 +229,10 @@ onUnmounted(() => {
             </ul>
         </div>
     </header>
+    <div class="flex">
+        <RestaurantCard :places="places" :sortOrder="sortOrder" /> 
+        <MapComponent :places="places" /> 
+      </div>
 </template>
 
 <style scoped>
