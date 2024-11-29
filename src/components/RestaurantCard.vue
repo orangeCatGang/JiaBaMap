@@ -77,25 +77,39 @@
  
 
 <script>
-        export default {
-            props: {
-                places:{
-                    type:Array,
-                    required: false,
-                    default: () => [],
-                }, 
-                sortOrder: String,
-            },
-            computed: {
-                sortedPlaces() {
-                    if (this.sortOrder === "distance") {
-                        return this.places.sort((a, b) => a.distance - b.distance);
-                    } else if (this.sortOrder === "rating") {
-                        return this.places.sort((a, b) => b.rating - a.rating);
-                    } else {
-                        return this.places;
-                    }
-                },
-            },
-        };
-        </script>
+export default {
+  data() {
+    return {
+      places: [], // 從 Local Storage 加載的餐廳列表
+      sortOrder: "default", // 從 Local Storage 加載的排序方式
+    };
+  },
+  computed: {
+    sortedPlaces() {
+      if (this.sortOrder === "distance") {
+        return this.places.sort((a, b) => a.distance - b.distance);
+      } else if (this.sortOrder === "rating") {
+        return this.places.sort((a, b) => b.rating - a.rating);
+      } else {
+        return this.places;
+      }
+    },
+  },
+  methods: {
+    fetchDataFromLocalStorage() {
+      const localStorageUtil = {
+        get(key) {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : null;
+        },
+      };
+
+      this.places = localStorageUtil.get("places") || [];
+      this.sortOrder = localStorageUtil.get("sortOrder") || "default";
+    },
+  },
+  mounted() {
+    this.fetchDataFromLocalStorage();
+  },
+};
+</script>

@@ -1,40 +1,51 @@
 <script>
-import { ref, onMounted, onUnmounted} from 'vue';
+import { ref, onMounted, onUnmounted } from "vue";
+import loader from "./googleMapsLoader.js";
 
-const isMenuOpen = ref(false);
-
-const toggleMenu = () => {
-    isMenuOpen.value = !isMenuOpen.value;
+// Local Storage 工具方法
+const localStorageUtil = {
+  set(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+  get(key) {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+  },
 };
-
-const checkScreenWidth = () => {
-    if (window.innerWidth > 768) {
-        isMenuOpen.value = false;  // 自動關閉選單
-    }
-};
-
-// 使用 onMounted 和 onUnmounted 來設置和移除事件監聽器
-onMounted(() => {
-    window.addEventListener('resize', checkScreenWidth);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('resize', checkScreenWidth);
-});
-
-import loader from "./googleMapsLoader.js"; // 引入共享的 Google Maps Loader
-import RestaurantCard from "./RestaurantCard.vue";
-import MapComponent from "./MapComponent.vue";
 
 export default {
-  components: {
-      RestaurantCard,
-      MapComponent,
+  setup() {
+    // 控制選單開關的狀態
+    const isMenuOpen = ref(false);
+
+    const toggleMenu = () => {
+      isMenuOpen.value = !isMenuOpen.value;
+    };
+
+    const checkScreenWidth = () => {
+      if (window.innerWidth > 768) {
+        isMenuOpen.value = false; // 自動關閉選單
+      }
+    };
+
+    // 在元件掛載和卸載時設置和移除事件監聽器
+    onMounted(() => {
+      window.addEventListener("resize", checkScreenWidth);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("resize", checkScreenWidth);
+    });
+
+    return {
+      isMenuOpen,
+      toggleMenu,
+    };
   },
   data() {
     return {
-      keyword: "", // 用戶輸入的關鍵字 (例如：餐廳)
-      selectedDistrict: "大安區", // 預設行政區為大安區
+      keyword: "", // 用戶輸入的關鍵字
+      selectedDistrict: "大安區", // 預設行政區
       sortOrder: "default", // 預設排序方式
       districts: {
         "中正區": { lat: 25.032404, lng: 121.519033 },
@@ -49,25 +60,14 @@ export default {
         "內湖區": { lat: 25.083, lng: 121.5868 },
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
-      }, // 各行政區的中心經緯度
+      },
       places: [], // 搜尋結果
-      searched: false, // 是否已進行搜尋
+      searched: false, // 是否已搜尋
     };
-  },
-  computed: {
-    sortedPlaces() {
-      if (this.sortOrder === "distance") {
-        return this.places.sort((a, b) => a.distance - b.distance);
-      } else if (this.sortOrder === "rating") {
-        return this.places.sort((a, b) => b.rating - a.rating);
-      } else {
-        return this.places; // 預設順序
-      }
-    },
   },
   methods: {
     async searchPlaces() {
-      this.places = []; // 清空舊的搜尋結果
+      this.places = [];
       this.searched = false;
 
       if (!this.keyword.trim()) {
@@ -75,9 +75,9 @@ export default {
         return;
       }
 
-      const { lat, lng } = this.districts[this.selectedDistrict]; // 根據選擇的行政區獲取經緯度
+      const { lat, lng } = this.districts[this.selectedDistrict];
 
-      // 使用共享的 Google Maps Loader
+      // 使用 Google Maps Loader
       await loader.load();
 
       const service = new google.maps.places.PlacesService(
@@ -85,14 +85,13 @@ export default {
       );
 
       const request = {
-        location: new google.maps.LatLng(lat, lng), // 使用選擇的行政區經緯度
-        radius: 1000, // 搜尋半徑 (公尺)
-        keyword: this.keyword, // 使用用戶輸入的關鍵字
+        location: new google.maps.LatLng(lat, lng),
+        radius: 1000,
+        keyword: this.keyword,
       };
 
       service.nearbySearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-          // 計算每個地點到中心點的距離
           this.places = results.map((place) => ({
             ...place,
             distance: this.calculateDistance(
@@ -104,18 +103,21 @@ export default {
             photo:
               place.photos && place.photos[0]
                 ? place.photos[0].getUrl({ maxWidth: 400 })
-                : null, // 獲取第一張圖片
+                : null,
           }));
+
+          // 儲存資料到 Local Storage
+          localStorageUtil.set("places", this.places);
+          localStorageUtil.set("sortOrder", this.sortOrder);
         } else {
           console.error("搜尋失敗，狀態：", status);
         }
 
-        
         this.searched = true;
       });
     },
     calculateDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371; // 地球半徑（公里）
+      const R = 6371;
       const dLat = this.degToRad(lat2 - lat1);
       const dLng = this.degToRad(lng2 - lng1);
       const a =
@@ -125,7 +127,7 @@ export default {
           Math.sin(dLng / 2) *
           Math.sin(dLng / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c; // 距離（公里）
+      return R * c;
     },
     degToRad(deg) {
       return deg * (Math.PI / 180);
@@ -133,6 +135,8 @@ export default {
   },
 };
 </script>
+
+
 
 
 <template>
@@ -229,10 +233,10 @@ export default {
             </ul>
         </div>
     </header>
-    <div class="flex">
+    <!-- <div class="flex">
         <RestaurantCard :places="places" :sortOrder="sortOrder" /> 
         <MapComponent :places="places" /> 
-      </div>
+      </div> -->
 </template>
 
 <style scoped>
