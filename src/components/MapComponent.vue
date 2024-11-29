@@ -1,152 +1,103 @@
 <template>
-  <!-- 地圖容器 -->
   <div ref="mapContainer" style="width: 50%; height: 100vh;"></div>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import loader from "./googleMapsLoader"; // 引入 Google Maps API Loader
+import { ref, onMounted, onUnmounted } from "vue";
+import loader from "./googleMapsLoader";
 
 export default {
   setup() {
     const map = ref(null); // Google 地圖實例
-    const markers = ref([]); // 管理地圖標記的數組
+    let markers = []; // 使用普通數組管理標記
+    const mapContainer = ref(null); // 地圖 DOM 容器
     const places = ref([]); // 從 Local Storage 加載的地點資料
-    const mapContainer = ref(null); // 地圖容器引用
 
-    // 從 Local Storage 獲取地點資料
+    // 從 Local Storage 加載地點資料
     const fetchPlacesFromLocalStorage = () => {
       const localStorageUtil = {
         get(key) {
           const value = localStorage.getItem(key);
-          return value ? JSON.parse(value) : null;
+          return value ? JSON.parse(value) : [];
         },
       };
-      places.value = localStorageUtil.get("places") || [];
+      places.value = localStorageUtil.get("places") || []; // 更新地點資料
+      updateMarkers(); // 每次加載新資料時更新標記
     };
 
     // 初始化 Google 地圖
     const initMap = async () => {
-  try {
-    await loader.load(); // 加載 Google Maps API
+      try {
+        await loader.load(); // 確保 Google Maps API 加載完成
+        map.value = new google.maps.Map(mapContainer.value, {
+          center: { lat: 25.033, lng: 121.565 }, // 台北市中心
+          zoom: 15,
+        });
 
-    // 創建地圖實例
-    map.value = new google.maps.Map(mapContainer.value, {
-      center: { lat: 25.033, lng: 121.565 }, // 台北市中心
-      zoom: 15,
-      mapId: "2179f521a7ab02c3", // Google Cloud Console 的地圖 ID
-    });
+        console.log("地圖初始化完成");
 
-    console.log("地圖實例初始化成功:", map.value);
-
-    // 延遲檢查 .gm-style 並插入靜態標記
-    setTimeout(() => {
-      const mapDiv = mapContainer.value.querySelector(".gm-style");
-      if (mapDiv) {
-        console.log("延遲後找到 .gm-style:", mapDiv);
-
-        // 插入靜態標記
-        const staticMarkerContent = document.createElement("div");
-        staticMarkerContent.style.width = "60px";
-        staticMarkerContent.style.height = "60px";
-        staticMarkerContent.style.backgroundColor = "blue";
-        staticMarkerContent.style.borderRadius = "50%";
-        staticMarkerContent.style.position = "absolute";
-        staticMarkerContent.style.zIndex = "1000";
-        staticMarkerContent.style.display = "flex";
-        staticMarkerContent.style.justifyContent = "center";
-        staticMarkerContent.style.alignItems = "center";
-        staticMarkerContent.style.color = "white";
-        staticMarkerContent.style.fontSize = "16px";
-        staticMarkerContent.style.fontWeight = "bold";
-        staticMarkerContent.innerHTML = `<span>Test</span>`;
-
-        mapDiv.appendChild(staticMarkerContent);
-        console.log("靜態標記手動添加到地圖:", staticMarkerContent);
-      } else {
-        console.error(".gm-style 找不到，無法插入標記內容");
+        // 地圖加載完成後首次更新標記
+        google.maps.event.addListenerOnce(map.value, "tilesloaded", () => {
+          updateMarkers();
+        });
+      } catch (error) {
+        console.error("地圖初始化失敗:", error);
       }
-    }, 1000); // 延遲 1 秒
-
-    // 等待地圖加載完成後更新標記
-    google.maps.event.addListenerOnce(map.value, "tilesloaded", () => {
-      console.log("地圖加載完成，添加動態標記...");
-      updateMarkers();
-    });
-  } catch (error) {
-    console.error("地圖初始化失敗:", error);
-  }
-};
-
+    };
 
     // 更新地圖上的標記
     const updateMarkers = () => {
-      console.log("更新標記，地點數據:", places.value);
-      clearMarkers();
+      clearMarkers(); // 清除舊標記
 
       places.value.forEach((place) => {
         if (!place.geometry || !place.geometry.location) {
-          console.error("無效的地點幾何信息:", place);
+          console.error("無效的地點資料:", place);
           return;
         }
 
-        const position = {
-          lat: place.geometry.location.lat,
-          lng: place.geometry.location.lng,
-        };
+        const position = place.geometry.location;
 
-        const markerContent = document.createElement("div");
-        markerContent.style.width = "60px";
-        markerContent.style.height = "60px";
-        markerContent.style.backgroundColor = "red";
-        markerContent.style.borderRadius = "50%";
-        markerContent.style.display = "flex";
-        markerContent.style.justifyContent = "center";
-        markerContent.style.alignItems = "center";
-        markerContent.style.color = "white";
-        markerContent.style.fontSize = "16px";
-        markerContent.style.fontWeight = "bold";
-        markerContent.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.3)";
-        markerContent.style.border = "2px solid white";
-        markerContent.innerHTML = `<span>${place.name[0]}</span>`;
-
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+        const marker = new google.maps.Marker({
           position,
           map: map.value,
           title: place.name,
-          content: markerContent,
         });
 
-        const infoWindow = new google.maps.InfoWindow({
-          content: `<div><strong>${place.name}</strong><br>${place.vicinity || ""}</div>`,
-        });
-
-        markerContent.addEventListener("click", () => {
-          infoWindow.open(map.value, marker);
-        });
-
-        markers.value.push(marker);
+        markers.push(marker); // 將新標記保存到數組中
       });
+
+      console.log("新標記已添加:", markers);
     };
 
     // 清除地圖上的標記
     const clearMarkers = () => {
-      markers.value.forEach((marker) => (marker.map = null));
-      markers.value = [];
+      markers.forEach((marker) => {
+        marker.setMap(null); // 從地圖上移除標記
+      });
+      markers = []; // 清空標記數組
+      console.log("標記已清除");
     };
 
-    // Vue 的生命周期掛載
+    // 設定事件監聽器以監控 Local Storage 資料變化
     onMounted(() => {
-      fetchPlacesFromLocalStorage();
+      // 初始化地圖
       initMap();
+
+      // 監聽自定義事件，當 Local Storage 更新時觸發
+      window.addEventListener("places-updated", fetchPlacesFromLocalStorage);
+
+      // 初次從 Local Storage 加載地點資料
+      fetchPlacesFromLocalStorage();
+    });
+
+    onUnmounted(() => {
+      // 移除事件監聽器
+      window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
     });
 
     return {
       mapContainer,
-      places,
-      markers,
     };
   },
 };
-
 </script>

@@ -6,6 +6,7 @@ import loader from "./googleMapsLoader.js";
 const localStorageUtil = {
   set(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
+    window.dispatchEvent(new Event("places-updated"));
   },
   get(key) {
     const value = localStorage.getItem(key);

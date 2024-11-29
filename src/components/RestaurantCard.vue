@@ -85,17 +85,23 @@ export default {
     };
   },
   computed: {
+    // 排序後的地點資料
     sortedPlaces() {
       if (this.sortOrder === "distance") {
-        return this.places.sort((a, b) => a.distance - b.distance);
+        return [...this.places].sort((a, b) => {
+          return (a.distance || 0) - (b.distance || 0); // 防止 distance 為空
+        });
       } else if (this.sortOrder === "rating") {
-        return this.places.sort((a, b) => b.rating - a.rating);
+        return [...this.places].sort((a, b) => {
+          return (b.rating || 0) - (a.rating || 0); // 防止 rating 為空
+        });
       } else {
-        return this.places;
+        return this.places; // 默認順序
       }
     },
   },
   methods: {
+    // 從 Local Storage 獲取資料
     fetchDataFromLocalStorage() {
       const localStorageUtil = {
         get(key) {
@@ -104,12 +110,26 @@ export default {
         },
       };
 
+      // 加載資料並設置默認值
       this.places = localStorageUtil.get("places") || [];
       this.sortOrder = localStorageUtil.get("sortOrder") || "default";
+    },
+
+    // 更新排序方式並保存到 Local Storage
+    updateSortOrder(order) {
+      this.sortOrder = order;
+      localStorage.setItem("sortOrder", JSON.stringify(order));
     },
   },
   mounted() {
     this.fetchDataFromLocalStorage();
+
+    // 可選：監聽 Local Storage 的更新
+    window.addEventListener("places-updated", this.fetchDataFromLocalStorage);
+  },
+  beforeDestroy() {
+    // 清除事件監聽器
+    window.removeEventListener("places-updated", this.fetchDataFromLocalStorage);
   },
 };
 </script>
