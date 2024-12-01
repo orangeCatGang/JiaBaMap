@@ -20,6 +20,7 @@ export default {
 
 <template>
     <Header />
+    <!-- <FilterBar /> -->
     <div class="overflow-x-auto hide-scrollbar">
       <div class="flex">
         <RestaurantCard />

@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed flex top-16 flex-col bg-white box-border w-full space-x-0  md:top-6 md:my-12 lg:my-12 z-50">
+    <div class=" flex top-32 flex-col bg-white box-border w-full space-x-0  md:top-6 md:my-12 lg:my-12 z-50">
 
         <div class="flex flex-col">
             <div class="p-3 font-bold text-gray-500">

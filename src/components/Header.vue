@@ -234,10 +234,6 @@ export default {
             </ul>
         </div>
     </header>
-    <!-- <div class="flex">
-        <RestaurantCard :places="places" :sortOrder="sortOrder" /> 
-        <MapComponent :places="places" /> 
-      </div> -->
 </template>
 
 <style scoped>
