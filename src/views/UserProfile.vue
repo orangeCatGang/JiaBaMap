@@ -6,7 +6,9 @@
                 <div class=" bg-slate-400 h-1/3">個人資料</div>
                 <UserTab />
             </div>
-            <div class="w-1/3 h-screen bg-slate-400">排行榜</div>
+            <div class="w-1/3 h-screen">
+                <RatingCard />
+            </div>
         </div>
     </div>
 </template>
@@ -14,4 +16,5 @@
 <script setup>
 import Header from '../components/Header.vue'
 import UserTab from '../components/userProfileComment/UserTab.vue'
+import RatingCard from '../components/userProfileComment/RatingCard.vue';
 </script>
