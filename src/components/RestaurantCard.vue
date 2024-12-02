@@ -95,7 +95,7 @@
                         <span class="text-green-600 mr-2 text-center">
                             <font-awesome-icon :icon="['fas', 'circle']" style="font-size: 8px;" />
                         </span>
-                        <!-- <p>營業時間: {{ restaurant.openingHours }}</p> -->
+                        <p> {{ place.opening_hours?.open_now ? '營業中' : '營業中' }}</p>
                     </div>
 
                     <div class="mt-3 ml-3 flex flex-wrap items-center">
