@@ -5,7 +5,11 @@ export default {
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'index_searchBG': "url('./src/assets/index_searchBG.jpg')",
+      }
+    },
   },
   plugins: [],
 }

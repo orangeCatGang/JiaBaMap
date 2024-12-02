@@ -1,11 +1,10 @@
 <template>
-  <!-- 地圖容器 -->
   <div ref="mapContainer" style="width: 50%; height: 100vh;"></div>
 </template>
 
 <script>
-import { onMounted, watch, ref } from "vue";
-import loader from "./googleMapsLoader"; // 引入 Google Maps API Loader
+import { ref, onMounted, onUnmounted } from "vue";
+import loader from "./googleMapsLoader";
 
 export default {
   props: {
@@ -20,9 +19,24 @@ export default {
     let markers = []; // 使用普通數組來管理標記
     let infoWindows = []; // 管理所有 InfoWindow
     const mapContainer = ref(null); // 地圖 DOM 容器
+    const places = ref([]); // 從 Local Storage 加載的地點資料
 
-    // 初始化地圖
-    const initMap = () => {
+    // 從 Local Storage 加載地點資料
+    const fetchPlacesFromLocalStorage = () => {
+      const localStorageUtil = {
+        get(key) {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : [];
+        },
+      };
+      places.value = localStorageUtil.get("places") || []; // 更新地點資料
+      updateMarkers(); // 每次加載新資料時更新標記
+    };
+    
+
+    // 初始化 Google 地圖
+    const initMap = async () => {
+      
       const customMapStyle = [
         // { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] },
         { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
@@ -31,19 +45,23 @@ export default {
         { featureType: "water", elementType: "labels", stylers: [{ visibility: "off" }] },
       ];
 
-      loader.load().then(() => {
-        // 初始化 Google Maps 實例
+      try {
+        await loader.load(); // 確保 Google Maps API 加載完成
         map.value = new google.maps.Map(mapContainer.value, {
           center: { lat: 25.033, lng: 121.565 }, // 台北市中心
           zoom: 15,
           styles: customMapStyle, // 套用自定義樣式
         });
 
-        // 地圖加載完成後更新標記
+        console.log("地圖初始化完成");
+
+        // 地圖加載完成後首次更新標記
         google.maps.event.addListenerOnce(map.value, "tilesloaded", () => {
           updateMarkers();
         });
-      });
+      } catch (error) {
+        console.error("地圖初始化失敗:", error);
+      }
     };
 
      // 更新標記，添加 InfoWindow 管理邏輯
@@ -58,14 +76,12 @@ export default {
 
       props.places.forEach((place) => {
         if (!place.geometry || !place.geometry.location) {
-          console.error("Invalid geometry for place:", place);
+          console.error("無效的地點資料:", place);
           return;
         }
 
-        // 確保位置是普通對象
-        const position = place.geometry.location.toJSON();
+        const position = place.geometry.location;
 
-        // 創建新標記
         const marker = new google.maps.Marker({
           position,
           map: map.value,
@@ -73,7 +89,7 @@ export default {
         });
 
          // 設定 InfoWindow（資訊視窗）
-         const infoWindow = new google.maps.InfoWindow({
+        const infoWindow = new google.maps.InfoWindow({
             content: `
               <div class="flex w-[320px] h-[114px] bg-white rounded-lg p-2 overflow-hidden">
                 <button class="absolute top-1 right-2 text-gray-500 hover:text-gray-700" 
@@ -160,18 +176,39 @@ export default {
               });
             };
 
-    // 監聽 props.places 的變化
-    watch(
-      () => props.places,
-      (newPlaces, oldPlaces) => {
-        console.log("Places updated:", { newPlaces, oldPlaces });
-        if (map.value) updateMarkers(); // 在地圖存在時更新標記
-      },
-      { deep: true } // 深度監聽以捕捉陣列變化
-    );
 
-    // 初始化地圖
-    onMounted(initMap);
+    // 清除地圖上的標記
+    const clearMarkers = () => {
+      markers.forEach((marker) => {
+        marker.setMap(null); // 從地圖上移除標記
+      });
+      infoWindows.forEach((infoWindow) => {
+        infoWindow.close();
+      });
+      markers = []; // 清空標記數組
+      infoWindows = [];
+    };
+
+    // 設定事件監聽器以監控 Local Storage 資料變化
+    onMounted(async () => {
+      try {
+        if (!mapContainer.value) {
+          throw new Error("地圖容器未掛載");
+        }
+        await initMap();
+        fetchPlacesFromLocalStorage();
+
+        // 監聽事件
+        window.addEventListener("places-updated", fetchPlacesFromLocalStorage);
+      } catch (error) {
+        console.error("mounted 鉤子發生錯誤:", error);
+      }
+    });
+
+    onUnmounted(() => {
+      // 確保移除事件監聽器
+      window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
+    });
 
     return {
       mapContainer,

@@ -19,10 +19,13 @@ export default {
 </script>
 
 <template>
-    <Header />
+    <!-- <Header /> -->
+    <!-- <FilterBar /> -->
     <div class="overflow-x-auto hide-scrollbar">
-      <!-- <RestaurantCard /> -->
-      <!-- <MapComponent/> -->
+      <!-- <div class="flex">
+          <RestaurantCard />
+          <MapComponent/>
+      </div> -->
       <RouterView />
       <Footer />
     </div>
