@@ -7,9 +7,20 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        'index_searchBG': "url('./src/assets/index_searchBG.jpg')",
+        //Photo by Ivan Torres on Unsplash
+        'index_searchBG': "url('/src/assets/index/index_searchBG.jpg')", 
+        //Photo by Delightin Dee on Unsplash
+        'index_btns_f': "url('/src/assets/index/index_fineDining.jpg')", 
+        //Photo by Brooke Lark on Unsplash
+        'index_btns_b': "url('/src/assets/index/index_brunch.jpg')", 
+        //Photo by Shengpengpeng Cai on Unsplash
+        'index_btns_h': "url('/src/assets/index/index_hotPot.jpg')",
+        //Photo by Farhad Ibrahimzade on Unsplash 
+        'index_btns_j': "url('/src/assets/index/index_japan.jpg')", 
+        //Photo by Philipp Kämmerer on Unsplash
+        'index_btns_q': "url('/src/assets/index/index_bbq.jpg')", 
       }
     },
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar-hide')],
 }
