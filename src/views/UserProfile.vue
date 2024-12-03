@@ -1,18 +1,12 @@
 <template>
     <div>
         <Header />
-<<<<<<< HEAD
         <div class="flex justify-center w-3/4 m-auto gap-9">
             <div class="w-2/3 ">
                 <UserSettings />
-=======
-        <div class="sm:flex justify-center w-3/4 m-auto gap-9">
-            <div class="w-full sm:w-2/3 ">
-                <div class=" bg-slate-400 h-1/3">個人資料</div>
->>>>>>> devSearch
                 <UserTab />
             </div>
-            <div class=" my-10 w-full sm:w-1/3 h-screen">
+            <div class="w-full h-screen my-10  sm:w-1/3">
                 <RatingCard />
             </div>
         </div>
