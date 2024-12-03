@@ -44,7 +44,7 @@
             </div>
 
             <!-- 編輯個人檔案按鈕 -->
-            <div class="mt-6 flex justify-center items-center relative">
+            <div class="mt-6 flex justify-center items-center relative ml-10">
                 <!-- 編輯個人檔案按鈕 (保持居中) -->
                 <button
                     @click="toggleEditMode"
@@ -54,7 +54,7 @@
                 </button>
 
                 <!-- ⋯按鈕 (距離編輯個人檔案按鈕右側4px) -->
-                <div class="relative ml-4">
+                <div class="relative">
                     <button
                         @click="toggleMenu"
                         class="p-2 text-gray-500 text-2xl hover:bg-amber-100 rounded-md focus:outline-none"
