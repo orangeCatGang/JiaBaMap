@@ -6,7 +6,7 @@
                 <UserSettings />
                 <UserTab />
             </div>
-            <div class="w-1/3 h-screen">
+            <div class="w-full h-screen my-10  sm:w-1/3">
                 <RatingCard />
             </div>
         </div>
