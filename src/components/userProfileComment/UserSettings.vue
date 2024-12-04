@@ -13,13 +13,13 @@
 
             <!-- 名稱和數據 -->
             <div class="text-center mt-4">
-                <h2 class="text-2xl font-bold text-gray-800">{{ username }}</h2>
+                <h2 class="text-2xl font-bold text-gray-700">{{ username }}</h2>
                 <div class="flex justify-center space-x-4 text-sm text-gray-500 mt-2">
                     <div>
-                        <span class="font-bold text-gray-800">0</span> 餐廳評論
+                        <span class="font-bold text-gray-700">0</span> 餐廳評論
                     </div>
                     <div>
-                        <span class="font-bold text-gray-800">0</span> 位粉絲
+                        <span class="font-bold text-gray-700">0</span> 位粉絲
                     </div>
                 </div>
             </div>
@@ -44,20 +44,21 @@
             </div>
 
             <!-- 編輯個人檔案按鈕 -->
-            <div class="mt-6 flex justify-center items-center relative ml-10">
+            <div class="mt-6 flex justify-center items-center relative">
+                <div class="w-full"></div>
                 <!-- 編輯個人檔案按鈕 (保持居中) -->
                 <button
                     @click="toggleEditMode"
-                    class="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    class="w-full min-w-36 py-2 mx-2 bg-amber-500 text-white rounded-md hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                     編輯個人檔案
                 </button>
 
                 <!-- ⋯按鈕 (距離編輯個人檔案按鈕右側4px) -->
-                <div class="relative">
+                <div class="relative w-full ">
                     <button
                         @click="toggleMenu"
-                        class="p-2 text-gray-500 text-2xl hover:bg-amber-100 rounded-md focus:outline-none"
+                        class=" p-1 text-gray-500 text-2xl hover:bg-amber-100 rounded-md focus:outline-none"
                         >
                         ⋯
                     </button>
@@ -76,6 +77,7 @@
                     </div>
                 </div>
             </div>
+        
         </div>
 
 <!-- ---------------------------------------------------------------------------------------- -->

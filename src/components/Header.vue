@@ -146,24 +146,24 @@ export default {
         <!-- LOGO -->
         <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></a>
         <!-- 搜尋欄容器 -->
-        <div class="hidden md:flex items-center px-4 bg-white rounded-full shadow-sm border border-gray-200 space-x-2 h-11 ml-52 " >
+        <div class="hidden md:flex items-center px-4 bg-white rounded-full shadow-sm border border-amber-400 space-x-2 h-11 ml-52 " >
             <input
             type="text"
             v-model="keyword"
             id="keyword"
             placeholder="美食分類、餐廳"
-            class=" flex-1  py-2 outline-none text-gray-600 placeholder-gray-400 "
+            class=" flex-1  py-2 outline-none text-amber-500 placeholder-amber-300 "
             />
             <!-- 餐具圖標 -->
             <font-awesome-icon :icon="['fas', 'utensils']" class="text-amber-500 w-5 h-5" />
             <div class="h-full border-l border-gray-300 mx-2 -my-2"></div>
     
             <!-- 城市選擇按鈕 -->
-            <div class="flex items-center space-x-1 bg-amber-100 text-amber-500 rounded-full px-3 py-1">
+            <div class="flex items-center space-x-1 border-[1.5px]  border-amber-100 text-amber-500 rounded-full px-3 py-1">
                 <!-- <span class=" min-w-16">台南市</span>
                 <button class="text-sm focus:outline-none">&times;</button> -->
-                <select v-model="selectedDistrict" id="district">
-                    <option v-for="(coords, district) in districts" :key="district" :value="district">
+                <select class="" v-model="selectedDistrict" id="district">
+                    <option class=" bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
                       {{ district }}
                     </option>
                   </select>
