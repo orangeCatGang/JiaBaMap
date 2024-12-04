@@ -1,15 +1,23 @@
 <script setup>
-import { onMounted, ref  } from 'vue';
+import { onMounted, ref, computed  } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRestaurantStore } from '../stores/storePage';
 import StoreComment from '../components/storeComment/StoreComment.vue'
 import Header from "../components/Header.vue";
 
 
+
 const restaurantStore = useRestaurantStore();
 onMounted(async () => {
     await restaurantStore.fetchPlaceDetail();
     await restaurantStore.fetchPhotos();
+    await restaurantStore.fetchSimilarRestaurants(
+        import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        "25.0443785,121.5467236",
+        1000
+    );
+    await restaurantStore.fetchRecommendedRestaurants();
+    await restaurantStore.fetchSearchTopics();
 });
 
 const {
@@ -25,6 +33,19 @@ const {
     googleMapsUri,
     openNow,
     storePhoto,
+
+    
+    similarRestaurants,
+    recommendedRestaurants,
+    searchTopics,
+    fetchSimilarRestaurants,
+    currentGroupIndex,
+    maxGroupIndex,
+    currentGroupRestaurants,
+    resetGroupIndex,
+
+    fetchRecommendedRestaurants,
+    fetchSearchTopics,
 } = storeToRefs(restaurantStore);
 
 const isDropdownVisible = ref(false);
@@ -123,23 +144,96 @@ document.addEventListener('click', handleDocumentClick);
                     </a>
                 </div>
             </div>
-            <!-- 地圖區域 -->
-            <div class="mt-10 text-gray-700">
-                <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的用戶評論</h3>
-                <StoreComment />
+
+
+            <div>
+                <!-- 相似餐廳 -->
+                <div class="mt-10 text-gray-700">
+                <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的相似餐廳</h3>
+                
+                <div class="flex items-center justify-center space-x-4">
+                <!-- 左側切換按鈕 -->
+                <button 
+                    @click="restaurantStore.prevGroup()"
+                    :disabled="currentGroupIndex === 0"
+                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                >
+                    ←
+                </button>
+
+                <!-- 餐廳展示區 -->
+                <div class="relative w-[650px] overflow-hidden"> <!-- 添加相對定位和固定寬度 -->
+                    <div 
+                    class="flex transition-transform duration-500 ease-in-out"
+                    :style="{ transform: `translateX(-${currentGroupIndex * 100}%)` }"
+                    >
+                    <div 
+                        v-for="restaurant in similarRestaurants" 
+                        :key="restaurant.place_id" 
+                        class="flex-shrink-0 w-1/3 px-2"
+                    >
+                        <div class="bg-white rounded-lg shadow-md">
+                        <img 
+                            v-if="restaurant.photoUrl"
+                            :src="restaurant.photoUrl" 
+                            :alt="restaurant.name" 
+                            class="w-full h-40 object-cover rounded-t-lg"
+                        >
+                        <div class="p-4">
+                            <h4 class="font-bold text-lg truncate">{{ restaurant.name }}</h4>
+                            <div class="flex justify-between items-center mt-2">
+                            <p class="text-gray-500">評分: {{ restaurant.rating }}</p>
+                            <p class="text-sm text-gray-400">{{ restaurant.userRatingCount }}則評論</p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- 右側切換按鈕 -->
+                <button 
+                    @click="restaurantStore.nextGroup()"
+                    :disabled="currentGroupIndex === maxGroupIndex"
+                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                >
+                    →
+                </button>
+                </div>
+
+                <!-- 頁碼指示器 -->
+                <div class="flex justify-center mt-4 space-x-2">
+                <div 
+                    v-for="index in maxGroupIndex + 1" 
+                    :key="index"
+                    :class="[
+                    'w-2 h-2 rounded-full cursor-pointer',
+                    currentGroupIndex === index - 1 ? 'bg-amber-500' : 'bg-gray-300'
+                    ]"
+                    @click="restaurantStore.currentGroupIndex = index - 1"
+                ></div>
+                </div>
             </div>
-            <!-- 地圖區域 -->
-            <div class="mt-10 text-gray-700">
-                <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的相似餐廳</h3>
-            </div>
-            <!-- 地圖區域 -->
-            <div class="mt-10 text-gray-700">
-                <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的其他推薦餐廳</h3>
-            </div>
-            <!-- 地圖區域 -->
-            <div class="mt-10 text-gray-700">
+
+                <!-- 搜尋相關主題 -->
+                <div class="mt-10 text-gray-700" >
                 <h3 class="mb-2 text-2xl font-bold">🔍 搜尋更多相關主題</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button 
+                    v-for="topic in searchTopics" 
+                    :key="topic" 
+                    class="px-3 py-1 bg-amber-100 text-amber-500 rounded-full hover:bg-amber-200"
+                    >
+                    {{ topic }}
+                    </button>
+                </div>
+                </div>
             </div>
+
+
+
+
+        
             <!-- 地圖區域 -->
             <div class="mt-10 text-gray-700">
                 <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的食記</h3>
