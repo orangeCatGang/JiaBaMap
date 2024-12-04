@@ -16,17 +16,19 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
 
-  
+  const isTransitioning = ref(false);
+  const transitionalIndex = ref(0);
 
   const groupSize = ref(3);
 
   // 監聽視窗大小變化
   const initializeWindowListener = () => {
-    window.addEventListener('resize', () => {
+    const updateGroupSize = () => {
       groupSize.value = window.innerWidth >= 640 ? 3 : 4;
-    });
-    // 初始化時也要設置一次
-    groupSize.value = window.innerWidth >= 640 ? 3 : 4;
+    };
+
+    window.addEventListener('resize', updateGroupSize);
+    updateGroupSize();
   };
   
   // 相似餐廳相關狀態
@@ -91,9 +93,59 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     }
   };
 
+  const staticMapUrl = computed(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    const zoom = 15; // 縮放級別
+    const size = "160x160"; // 地圖大小
+    const marker = "color:red|label"; // 標記點樣式
+    
+    // 如果沒有位置資訊，返回空
+    if (!formattedAddress.value) return null;
+    
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(formattedAddress.value)}&zoom=${zoom}&size=${size}&markers=${marker}|${encodeURIComponent(formattedAddress.value)}&key=${apiKey}`;
+  });
 
-   // 計算最大頁數索引
-   const maxGroupIndex = computed(() => {
+
+  
+  // 獲取類似餐廳
+  const fetchSimilarRestaurants = async (apiKey, location, radius) => {
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=restaurant&key=${apiKey}`
+
+    try {
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/'
+      const res = await fetch(proxyUrl + apiUrl)
+
+      if (!res.ok) {
+        throw new Error(`HTTP Error: ${res.status}`)
+      }
+
+      const resJson = await res.json()
+      
+      if (resJson.status !== "OK") {
+        console.error(`Google API Error: ${resJson.status}`, resJson.error_message)
+        return
+      }
+
+      similarRestaurants.value = resJson.results.map((restaurant) => ({
+        name: restaurant.name,
+        rating: restaurant.rating || "N/A",
+        userRatingCount: restaurant.user_ratings_total || 0,
+        address: restaurant.vicinity || "Unknown Address",
+        location: restaurant.geometry?.location,
+        isOpen: restaurant.opening_hours?.open_now || false,
+        photoUrl: restaurant.photos
+          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${apiKey}`
+          : null,
+        place_id: restaurant.place_id
+      }))
+      resetGroupIndex()
+    } catch (err) {
+      console.error("Fetch error:", err.message)
+    }
+  }
+  
+    // 計算最大頁數索引
+    const maxGroupIndex = computed(() => {
     if (!similarRestaurants.value?.length) return 0;
     return Math.max(0, Math.ceil(similarRestaurants.value.length / groupSize.value) - 1);
   });
@@ -133,46 +185,9 @@ export const useRestaurantStore = defineStore("restaurant", () => {
         return [...restaurants, ...restaurants.slice(0, groupSize.value - remainingSlots)];
     }
     return restaurants;
-});
-
-  // 獲取類似餐廳
-  const fetchSimilarRestaurants = async (apiKey, location, radius) => {
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=restaurant&key=${apiKey}`
-
-    try {
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/'
-      const res = await fetch(proxyUrl + apiUrl)
-
-      if (!res.ok) {
-        throw new Error(`HTTP Error: ${res.status}`)
-      }
-
-      const resJson = await res.json()
-      
-      if (resJson.status !== "OK") {
-        console.error(`Google API Error: ${resJson.status}`, resJson.error_message)
-        return
-      }
-
-      similarRestaurants.value = resJson.results.map((restaurant) => ({
-        name: restaurant.name,
-        rating: restaurant.rating || "N/A",
-        userRatingCount: restaurant.user_ratings_total || 0,
-        address: restaurant.vicinity || "Unknown Address",
-        location: restaurant.geometry?.location,
-        isOpen: restaurant.opening_hours?.open_now || false,
-        photoUrl: restaurant.photos
-          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${apiKey}`
-          : null,
-        place_id: restaurant.place_id
-      }))
-      console.log(similarRestaurants.value);
-      // 重置组索引
-      resetGroupIndex()
-    } catch (err) {
-      console.error("Fetch error:", err.message)
-    }
-  }
+  });
+  console.log(similarRestaurants.value);
+  // 重置组索引
 
   // 推薦餐廳的計算屬性
   const displayRecommendedRestaurants = computed(() => {
@@ -281,10 +296,6 @@ const maxRecommendedGroupIndex = computed(() => {
   };
 
 
-  console.log('Group Size:', groupSize.value);
-console.log('Similar Restaurants:', similarRestaurants.value);
-console.log('Recommended Restaurants:', recommendedRestaurants.value);
-
   return {
     storeName,
     rating,
@@ -301,24 +312,24 @@ console.log('Recommended Restaurants:', recommendedRestaurants.value);
     openNow,
     fetchPlaceDetail,
     fetchPhotos,
-
+    staticMapUrl,
      // 相似餐廳相關
-     similarRestaurants,
-     currentGroupIndex,
-     maxGroupIndex,
-     displayRestaurants,
-     nextGroup,
-     prevGroup,
-     fetchSimilarRestaurants,
- 
-     // 推薦餐廳相關
-     recommendedRestaurants,
-     recommendedGroupIndex,
-     maxRecommendedGroupIndex,
-     displayRecommendedRestaurants,
-     nextRecommendedGroup,
-     prevRecommendedGroup,
-     fetchRecommendedRestaurants,
+    similarRestaurants,
+    currentGroupIndex,
+    maxGroupIndex,
+    displayRestaurants,
+    nextGroup,
+    prevGroup,
+    fetchSimilarRestaurants,
+
+    // 推薦餐廳相關
+    recommendedRestaurants,
+    recommendedGroupIndex,
+    maxRecommendedGroupIndex,
+    displayRecommendedRestaurants,
+    nextRecommendedGroup,
+    prevRecommendedGroup,
+    fetchRecommendedRestaurants,
 
      // 搜尋主題
     searchTopics,

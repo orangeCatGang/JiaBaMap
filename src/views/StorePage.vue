@@ -54,7 +54,6 @@ const {
     googleMapsUri,
     openNow,
     storePhoto,
-    
     // 相似餐廳相關
     similarRestaurants,
     currentGroupIndex,
@@ -67,7 +66,9 @@ const {
     recommendedGroupIndex,
     maxRecommendedGroupIndex,
     displayRecommendedRestaurants,
-    
+
+    // 靜態地圖
+    staticMapUrl,
     
     searchTopics,
     fetchSearchTopics,
@@ -176,8 +177,22 @@ document.addEventListener('click', handleDocumentClick);
             </div>
             <!-- 店家詳情區 -->
             <div class="flex items-center mt-10 space-x-4">
-                <div>
-                    <img :src="storeMap" alt="Store Thumbnail" class="object-cover w-40 rounded-lg">
+                <div flex flex-col >
+                    <a :href="googleMapsUri" target="_blank" class="cursor-pointer hover:opacity-90">
+                        <img :src="staticMapUrl" alt="formattedAddress" class="object-cover w-40 h-40 rounded-lg">
+                    </a>
+                    <!-- 評價部分 -->
+                    <a :href="googleMapsUri" target="_blank" class="cursor-pointer hover:opacity-90">
+                        <div class="mt-2 w-40">
+                            <div class="flex items-center mb-1 py-1 rounded bg-amber-500 justify-center ">
+                                <font-awesome-icon :icon="['fab', 'google']" class="text-blue-600 w-4 h-4 mr-1"/>
+                                <div class="flex items-center">
+                                    <span class="text-sm">評價:</span>
+                                    <span class="text-sm text-gray-500">{{ userRatingCount }}+</span>
+                                </div>
+                            </div>   
+                        </div>
+                    </a>
                 </div>
                 <div class="space-y-2">
                     <div class="relative inline-block ml-12">
