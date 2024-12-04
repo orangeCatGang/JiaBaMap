@@ -16,8 +16,6 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
 
-  const isTransitioning = ref(false);
-  const transitionalIndex = ref(0);
 
   const groupSize = ref(3);
 
