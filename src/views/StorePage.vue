@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useRestaurantStore } from '../stores/storePage';
 import StoreComment from '../components/storeComment/StoreComment.vue'
 import Header from "../components/Header.vue";
+import StoreType from '../components/HomePage/StoreType.vue';
 
 
 const restaurantStore = useRestaurantStore();
@@ -33,6 +34,9 @@ const isDropdownVisible = ref(false);
 function handleDocumentClick(event) {
     const button = document.getElementById('dropdownButton');
     const menu = document.getElementById('dropdownMenu');
+    if (!button || !menu) {
+        return; // 如果元素不存在，直接退出函數
+    }
 
     if (!button.contains(event.target) && !menu.contains(event.target)) {
         isDropdownVisible.value = false;
@@ -144,9 +148,9 @@ document.addEventListener('click', handleDocumentClick);
             <div class="mt-10 text-gray-700">
                 <h3 class="mb-2 text-2xl font-bold">和牛涮 日式鍋物放題 台南中華西店 的食記</h3>
             </div>
-            <!-- 地圖區域 -->
+            <!-- 熱門餐廳分類 -->
             <div class="mt-10 text-gray-700">
-                <h3 class="mb-2 text-2xl font-bold">熱門餐廳分類</h3>
+                <StoreType/>
             </div>
         </div>
     </div>
