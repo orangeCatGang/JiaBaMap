@@ -151,6 +151,7 @@ export default {
             type="text"
             v-model="keyword"
             id="keyword"
+            @keydown.enter="searchPlaces"
             placeholder="美食分類、餐廳"
             class=" flex-1  py-2 outline-none text-amber-500 placeholder-amber-300 "
             />
@@ -171,7 +172,8 @@ export default {
             <!-- 地點圖標 -->
             <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="text-amber-500 w-5 h-5" />
             <!-- 搜索按鈕 -->
-            <button class="bg-amber-500 text-white py-1 px-4 rounded-full shadow-md focus:outline-none ml-52" @click="searchPlaces">
+            <button class="bg-amber-500 text-white py-1 px-4 rounded-full shadow-md focus:outline-none ml-52" @click="searchPlaces"
+            >
                 <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
             </button>
         </div>
