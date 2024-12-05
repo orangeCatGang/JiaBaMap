@@ -32,11 +32,11 @@ import { ref } from 'vue';
                     <li><a href="#" class="custom-underline">如何加入愛食記？</a></li>
                     <li><a href="#" class="custom-underline">聯繫部落客</a></li>
                 </ul>
-                <p class="text-gray-400 text-sm mt-4">v: 1.8.3, 67</p>
+                <p class="text-amber-100 text-sm mt-4">v: 1.8.3, 67</p>
             </div>
         </div>
         <!-- 底部版權 -->
-        <div class="text-center mt-4 text-gray-400">
+        <div class="text-center mt-4 text-amber-100">
             <p>Copyright © Tsunami Works 2013-2024 ❤️</p>
         </div>
     </footer>

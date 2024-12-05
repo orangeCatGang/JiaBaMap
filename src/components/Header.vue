@@ -105,6 +105,7 @@ export default {
         location: new google.maps.LatLng(lat, lng),
         radius: 1000,
         keyword: this.keyword,
+        type: "restaurant",
       };
 
       service.nearbySearch(request, (results, status) => {
@@ -126,6 +127,11 @@ export default {
           // 儲存資料到 Local Storage
           localStorageUtil.set("places", this.places);
           localStorageUtil.set("sortOrder", this.sortOrder);
+          // 跳轉到 SearchPage，並傳遞搜尋條件
+          this.$router.push({
+            path: "/search",
+            query: { keyword: this.keyword },
+          });
         } else {
           console.error("搜尋失敗，狀態：", status);
         }
