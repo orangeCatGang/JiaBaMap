@@ -18,9 +18,15 @@ export default {
   setup() {
     // 控制選單開關的狀態
     const isMenuOpen = ref(false);
+    const menuContainer = ref(null);
 
     const toggleMenu = () => {
       isMenuOpen.value = !isMenuOpen.value;
+      if (isMenuOpen.value) {
+        document.addEventListener('click', handleClickOutside);
+      } else {
+        document.removeEventListener('click', handleClickOutside);
+      }
     };
 
     const checkScreenWidth = () => {
@@ -29,18 +35,28 @@ export default {
       }
     };
 
+    const handleClickOutside = (event) => {
+      if (menuContainer.value && !menuContainer.value.contains(event.target)) {
+        isMenuOpen.value = false; // 點擊外部時關閉選單
+      }
+    };
+
     // 在元件掛載和卸載時設置和移除事件監聽器
     onMounted(() => {
       window.addEventListener("resize", checkScreenWidth);
+      document.addEventListener('click', handleClickOutside);
+
     });
 
     onUnmounted(() => {
       window.removeEventListener("resize", checkScreenWidth);
+      document.removeEventListener('click', handleClickOutside);
     });
 
     return {
       isMenuOpen,
       toggleMenu,
+      menuContainer
     };
   },
   data() {
@@ -138,28 +154,26 @@ export default {
 </script>
 
 
-
-
 <template>
     <!-- 頁頭（導航欄） -->
-    <header class="p-2 flex justify-between items-center flex-wrap space-y-2 md:space-y-0 space-x-4 border-b border-orange-200">
+    <header class="flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 md:space-y-0">
         <!-- LOGO -->
-        <a href="#"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></a>
+        <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 搜尋欄容器 -->
-        <div class="hidden md:flex items-center px-4 bg-white rounded-full shadow-sm border border-gray-200 space-x-2 h-11 ml-52 " >
+        <div class="items-center hidden px-4 space-x-2 bg-white border border-gray-200 rounded-full shadow-sm md:flex h-11 ml-52 " >
             <input
             type="text"
             v-model="keyword"
             id="keyword"
             placeholder="美食分類、餐廳"
-            class=" flex-1  py-2 outline-none text-gray-600 placeholder-gray-400 "
+            class="flex-1 py-2 text-gray-600 placeholder-gray-400 outline-none "
             />
             <!-- 餐具圖標 -->
-            <font-awesome-icon :icon="['fas', 'utensils']" class="text-amber-500 w-5 h-5" />
-            <div class="h-full border-l border-gray-300 mx-2 -my-2"></div>
+            <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500" />
+            <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
     
             <!-- 城市選擇按鈕 -->
-            <div class="flex items-center space-x-1 bg-amber-100 text-amber-500 rounded-full px-3 py-1">
+            <div class="flex items-center px-3 py-1 space-x-1 rounded-full bg-amber-100 text-amber-500">
                 <!-- <span class=" min-w-16">台南市</span>
                 <button class="text-sm focus:outline-none">&times;</button> -->
                 <select v-model="selectedDistrict" id="district">
@@ -169,23 +183,23 @@ export default {
                   </select>
             </div>
             <!-- 地點圖標 -->
-            <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="text-amber-500 w-5 h-5" />
+            <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500" />
             <!-- 搜索按鈕 -->
-            <button class="bg-amber-500 text-white py-1 px-4 rounded-full shadow-md focus:outline-none ml-52" @click="searchPlaces">
+            <button class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none ml-52" @click="searchPlaces">
                 <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
             </button>
         </div>
         <!-- 主選單 -->
-        <div class="md:flex items-center space-x-4 main-menu">
-            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">發表食記</a>
-            <a href="#" class="text-amber-500 hover:bg-amber-100 rounded-md p-2 min-w-20">專欄文章</a>
+        <div class="items-center space-x-4 md:flex main-menu">
+            <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
+            <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
             <!-- 店家專區的下拉選單 -->
-            <div class="relative group inline-block text-left">
-                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none min-w-20">
+            <div class="relative inline-block text-left group">
+                <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
                     店家專區
                     <span>&#x25BC;</span>
                 </button>
-                <div class="absolute hidden group-hover:block mt-0 w-48 bg-white rounded-md shadow-lg z-10">
+                <div class="absolute z-10 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
                     <ul class="mt-2">
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
@@ -194,44 +208,80 @@ export default {
                 </div>
             </div>
             <!-- 排行榜的下拉選單 -->
-            <div class="relative group inline-block text-left">
-                <button class="text-amber-500 rounded-md hover:bg-amber-100 p-2 focus:outline-none min-w-20">
+            <div class="relative inline-block text-left group">
+                <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
                     排行榜
                     <span>&#x25BC;</span>
                 </button>
-                <div class="absolute hidden group-hover:block mt-0 w-48 bg-white rounded-md shadow-lg z-10">
+                <div class="absolute z-10 hidden w-32 mt-0 bg-white rounded-md shadow-lg group-hover:block">
                     <ul class="mt-2">
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
                     <li><a href="#" class="block px-4 py-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">月排行</a></li>
                     </ul>
                 </div>
             </div>
+            <!-- 會員頭貼 -->
+            <div class="relative inline-block text-left group">
+              <div class="w-10 h-10 rounded-full cursor-pointer bg-slate-400">
+                <img src="/src/assets/default_user.png" alt="avatar">
+              </div>
+              <!-- 會員下拉選單 -->
+              <div class="absolute right-0 z-10 hidden w-32 mt-0 bg-white rounded-md shadow-md group-hover:block">
+                <ul class="mt-2">
+                  <li>
+                    <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100">
+                      <font-awesome-icon
+                        :icon="['fas', 'user']"
+                        class="mr-4 text-amber-500" />個人檔案
+                    </router-link>
+                  </li>
+                  <li>
+                      <router-link to="/user" class="block px-4 py-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">
+                        <font-awesome-icon
+                        :icon="['fas', 'bookmark']"
+                        class="mr-4 text-amber-500" />珍藏餐廳
+                      </router-link>
+                  </li>
+                </ul>
+              </div>
+            </div> 
+            <!-- 會員頭貼end -->
         </div>
-        <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
-        <div class="md:hidden flex items-center space-x-4 hamburger-menu">
-            <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="text-amber-500 w-5 h-5" /></a>
-            <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
-            <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
-            </button>
-        </div>
-        <!-- 小螢幕的下拉選單 -->
-        <div v-if="isMenuOpen" class="absolute top-16 right-4 w-48 bg-white shadow-md rounded-lg z-50">
-            <ul class="flex flex-col mt-2">
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</a></li>
-                <hr class="border-amber-200">
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</a></li>
-                <hr class="border-amber-200">
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
-                <hr class="border-amber-200">
-                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">登出</a></li>
-            </ul>
+        <div ref="menuContainer" class="md:hidden">
+          <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
+          <div class="flex items-center space-x-4 md:hidden hamburger-menu">
+              <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5 text-amber-500" /></a>
+              <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
+              <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
+              </button>
+          </div>
+          <!-- 小螢幕的下拉選單 -->
+          <div v-if="isMenuOpen" class="absolute z-50 w-48 bg-white rounded-lg shadow-md top-16 right-4">
+              <ul class="flex flex-col mt-2">
+                <li href="#" class="flex cursor-pointer align-center">
+                    <div class="w-10 h-10 ml-2 rounded-full bg-slate-400">
+                      <img src="/src/assets/default_user.png" alt="avatar">
+                    </div>
+                    <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">Julie Wang</router-link>
+                  </li>
+                  <hr class="mt-2 border-amber-200">
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">週排行</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">搜尋餐廳</a></li>
+                  <hr class="border-amber-200">
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">線上訂位</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">美食專欄</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">發表食記</a></li>
+                  <hr class="border-amber-200">
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">行銷方案</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">邀請部落客</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">店家加入</a></li>
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">聯絡我們</a></li>
+                  <hr class="border-amber-200">
+                  <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">登出</a></li>
+              </ul>
+          </div>
+          <!-- 下拉end -->
         </div>
     </header>
 </template>

@@ -6,7 +6,7 @@
                 <UserSettings />
                 <UserTab />
             </div>
-            <div class="w-full h-screen my-10  sm:w-1/3">
+            <div class="w-full h-screen my-10 sm:w-1/3">
                 <RatingCard />
             </div>
         </div>
@@ -15,7 +15,7 @@
 
 <script setup>
 import Header from '../components/Header.vue'
-import UserTab from '../components/userProfileComment/UserTab.vue'
-import RatingCard from '../components/userProfileComment/RatingCard.vue';
-import UserSettings from '../components/userProfileComment/UserSettings.vue';
+import UserTab from '../components/userProfile/UserTab.vue'
+import RatingCard from '../components/userProfile/RatingCard.vue';
+import UserSettings from '../components/userProfile/UserSettings.vue';
 </script>
