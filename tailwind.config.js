@@ -19,6 +19,16 @@ export default {
         'index_btns_j': "url('/src/assets/index/index_japan.jpg')", 
         //Photo by Philipp Kämmerer on Unsplash
         'index_btns_q': "url('/src/assets/index/index_bbq.jpg')", 
+        //Photo by Jennie Brown on Unsplash
+        'index_btns_d': "url('/src/assets/index/index_dessert.jpg')",
+        //Photo by Luna Wang on Unsplash
+        'index_btns_c': "url('/src/assets/index/index_chinese.jpg')",
+        //Photo by Vicky Ng on Unsplash
+        'index_btns_k': "url('/src/assets/index/index_korean.jpg')",
+        //Photo by Kelly Sikkema on Unsplash
+        'index_btns_a': "url('/src/assets/index/index_alchol.jpg')",
+        //Photo by ibmoon Kim on Unsplash
+        'index_btns_i': "url('/src/assets/index/index_izayaka.jpg')",
       }
     },
   },
