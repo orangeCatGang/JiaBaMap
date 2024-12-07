@@ -237,7 +237,7 @@ document.addEventListener('click', handleDocumentClick);
             </div>
 
                 <!-- 相似餐廳 -->
-            <div class="mt-10 text-gray-700 w-[900px] mx-auto">
+            <div class="mt-10 text-gray-700 md:w-[900px] mx-auto">
                 <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的相似餐廳</h3>
                 <div class="flex items-center justify-center space-x-4">
                     <!-- 左側切換按鈕 -->
@@ -256,9 +256,9 @@ document.addEventListener('click', handleDocumentClick);
                             <div 
                                 v-for="restaurant in displayRestaurants" 
                                 :key="restaurant.place_id" 
-                                class="flex-shrink-0 w-1/3 px-2"
+                                class="flex-shrink-0 w-1/2 md:w-1/3 px-2"
                             >
-                                <div class="bg-white rounded-lg shadow-md mb-4 w-[250px] mx-auto">
+                                <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px] mx-auto">
                                     <div class="h-40 overflow-hidden">
                                         <img 
                                             v-if="restaurant.photoUrl"
@@ -269,9 +269,9 @@ document.addEventListener('click', handleDocumentClick);
                                     </div>
                                     <div class="p-4">
                                         <h4 class="font-bold text-lg truncate">{{ restaurant.name }}</h4>
-                                        <div class="flex justify-between items-center mt-2">
-                                            <p class="text-white bg-amber-500 px-2 rounded-full">評分: {{ restaurant.rating }}★</p>
-                                            <p class="text-sm text-gray-400">{{ restaurant.userRatingCount }}則評論</p>
+                                        <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
+                                            <p class="text-white bg-amber-500 px-2 rounded-full w-fit">評分: {{ restaurant.rating }}★</p>
+                                            <p class="text-sm text-gray-400 ">{{ restaurant.userRatingCount }}則評論</p>
                                         </div>
                                     </div>
                                 </div>
@@ -303,7 +303,7 @@ document.addEventListener('click', handleDocumentClick);
 
 
                 <!-- 推薦餐廳部分 -->
-                <div class="mt-10 text-gray-700  w-[900px] mx-auto">
+                <div class="mt-10 text-gray-700  md:w-[900px] mx-auto">
                     <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的其他推薦餐廳</h3>
                     <div class="flex items-center justify-center space-x-4">
                         <button 
@@ -321,9 +321,9 @@ document.addEventListener('click', handleDocumentClick);
                             <div 
                             v-for="restaurant in displayRecommendedRestaurants" 
                             :key="restaurant.place_id" 
-                            class="flex-shrink-0 w-1/3 px-2"
+                            class="flex-shrink-0 w-1/2 md:w-1/3 px-2"
                             >
-                            <div class="bg-white rounded-lg shadow-md mb-4 mx-auto w-[250px]" >
+                            <div class="bg-white rounded-lg shadow-md mb-4 mx-auto max-w-[250px]" >
                                 <div class="h-40 overflow-hidden">
                                     <img 
                                     v-if="restaurant.photoUrl"
@@ -334,9 +334,9 @@ document.addEventListener('click', handleDocumentClick);
                                 </div>
                                 <div class="p-4">
                                 <h4 class="font-bold text-lg truncate">{{ restaurant.name }}</h4>
-                                <div class="flex justify-between items-center mt-2">
-                                        <p class="text-white bg-amber-500 rounded-full px-2">評分: {{ restaurant.rating }}★</p>
-                                    <p class="text-sm text-gray-400">{{ restaurant.userRatingCount }}則評論</p>
+                                <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
+                                        <p class="text-white bg-amber-500 rounded-full px-2 w-fit">評分: {{ restaurant.rating }}★</p>
+                                    <p class="text-sm text-gray-400 ">{{ restaurant.userRatingCount }}則評論</p>
                                 </div>
                                 </div>
                             </div>
