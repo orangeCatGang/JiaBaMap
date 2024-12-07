@@ -18,11 +18,12 @@ export const useRestaurantStore = defineStore("restaurant", () => {
 
 
   const groupSize = ref(3);
-
-  // 監聽視窗大小變化
+  const totalItems = 20; // 卡片總數
+  
+  // 修改後的視窗監聽器，處理不同斷點
   const initializeWindowListener = () => {
     const updateGroupSize = () => {
-      groupSize.value = window.innerWidth >= 640 ? 3 : 4;
+      groupSize.value = window.innerWidth >= 768 ? 3 : 2;
     };
 
     window.addEventListener('resize', updateGroupSize);
@@ -142,10 +143,15 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     }
   }
   
-    // 計算最大頁數索引
-    const maxGroupIndex = computed(() => {
+    // 修改後的 maxGroupIndex 計算，處理不同螢幕大小
+  const maxGroupIndex = computed(() => {
     if (!similarRestaurants.value?.length) return 0;
-    return Math.max(0, Math.ceil(similarRestaurants.value.length / groupSize.value) - 1);
+    
+    // 螢幕 >= 768px: 7頁 (20張卡片 / 每頁3張 ≈ 7)
+    // 螢幕 < 768px: 10頁 (20張卡片 / 每頁2張 = 10)
+    return window.innerWidth >= 768 
+      ? Math.ceil(totalItems / 3) - 1  // 7頁 (0-6)
+      : Math.ceil(totalItems / 2) - 1; // 10頁 (0-9)
   });
 
   // 當前頁面顯示的餐廳
@@ -155,35 +161,44 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     return similarRestaurants.value.slice(start, end);
   });
 
-  // 下一組 - 修改為循環邏輯
-  const nextGroup = () => {
+   // 修改後的導航方法，處理新的分頁邏輯
+   const nextGroup = () => {
     if (currentGroupIndex.value >= maxGroupIndex.value) {
-      currentGroupIndex.value = 0; // 回到第一頁
+      currentGroupIndex.value = 0;
     } else {
       currentGroupIndex.value++;
     }
   };
 
-  // 上一組 - 修改為循環邏輯
   const prevGroup = () => {
     if (currentGroupIndex.value <= 0) {
-      currentGroupIndex.value = maxGroupIndex.value; // 跳到最後一頁
+      currentGroupIndex.value = maxGroupIndex.value;
     } else {
       currentGroupIndex.value--;
     }
   };
 
-  // 計算要顯示的餐廳列表，包括補充的餐廳
-  const displayRestaurants = computed(() => {
+   // 修改後的 displayRestaurants 計算
+   const displayRestaurants = computed(() => {
     const restaurants = similarRestaurants.value || [];
     if (!restaurants.length) return [];
     
-    const remainingSlots = (restaurants.length % groupSize.value);
-    if (remainingSlots > 0) {
-        return [...restaurants, ...restaurants.slice(0, groupSize.value - remainingSlots)];
+    const currentGroupSize = window.innerWidth >= 768 ? 3 : 2;
+    const start = currentGroupIndex.value * currentGroupSize;
+    const end = start + currentGroupSize;
+    
+    // 如果需要填充空位，使用開頭的項目
+    let slicedRestaurants = restaurants.slice(start, end);
+    while (slicedRestaurants.length < currentGroupSize && restaurants.length > 0) {
+      slicedRestaurants = [
+        ...slicedRestaurants,
+        ...restaurants.slice(0, currentGroupSize - slicedRestaurants.length)
+      ];
     }
-    return restaurants;
+    
+    return slicedRestaurants;
   });
+
   console.log(similarRestaurants.value);
   // 重置组索引
 
@@ -319,6 +334,8 @@ const maxRecommendedGroupIndex = computed(() => {
     nextGroup,
     prevGroup,
     fetchSimilarRestaurants,
+    
+  
 
     // 推薦餐廳相關
     recommendedRestaurants,
@@ -335,6 +352,7 @@ const maxRecommendedGroupIndex = computed(() => {
     
     initializeWindowListener,
     groupSize,
-  };
 
+
+  };
 });

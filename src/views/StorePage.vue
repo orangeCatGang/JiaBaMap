@@ -268,7 +268,7 @@ document.addEventListener('click', handleDocumentClick);
                                         >
                                     </div>
                                     <div class="p-4">
-                                        <h4 class="font-bold text-lg truncate">{{ restaurant.name }}</h4>
+                                        <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant.name }}</h4>
                                         <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
                                             <p class="text-white bg-amber-500 px-2 rounded-full w-fit">評分: {{ restaurant.rating }}★</p>
                                             <p class="text-sm text-gray-400 ">{{ restaurant.userRatingCount }}則評論</p>
@@ -333,7 +333,7 @@ document.addEventListener('click', handleDocumentClick);
                                     >
                                 </div>
                                 <div class="p-4">
-                                <h4 class="font-bold text-lg truncate">{{ restaurant.name }}</h4>
+                                <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant.name }}</h4>
                                 <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
                                         <p class="text-white bg-amber-500 rounded-full px-2 w-fit">評分: {{ restaurant.rating }}★</p>
                                     <p class="text-sm text-gray-400 ">{{ restaurant.userRatingCount }}則評論</p>
