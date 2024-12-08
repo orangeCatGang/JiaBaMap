@@ -68,7 +68,7 @@
               <li
                 v-for="(label, value) in costOptions"
                 :key="value"
-                class="cursor-pointer hover:bg-amber-500 py-1">
+                class="cursor-pointer hover:bg-amber-500 py-1 ">
                 <span>{{ label }}</span>
               </li>
             </ul>
@@ -92,7 +92,10 @@
     <div 
       v-for="place in sortedPlaces" 
       :key="place.place_id"
-      class="flex mt-2 items-center pb-2 border-b">
+      class="flex mt-2 items-center pb-2 border-b transition-colors duration-200"
+      :class="{ 'bg-black': store.hoveredPlaceId === place.place_id }"
+      @mouseenter="handleMouseEnter(place.place_id)"
+      @mouseleave="handleMouseLeave">
       <div class="w-40 h-32 ml-3">
         <img v-if="place.photo" :src="place.photo" alt="Place image" class="object-cover w-full h-full" />
       </div>
@@ -124,93 +127,84 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRestaurantStore } from '@/stores/searchPage';
 
-export default {
-  setup() {
-    const places = ref([]);
-    const sortOrder = ref("default");
-    const costOrder = ref("default");
-    const sortMenu = ref(false);
-    const costMenu = ref(false);
+const restaurantStore = useRestaurantStore()
+const places = ref([]);
+const sortOrder = ref("default");
+const costOrder = ref("default");
+const sortMenu = ref(false);
+const costMenu = ref(false);
 
-    const sortOptions = {
-      default: "預設",
-      distance: "最近距離",
-      rating: "最高評分",
-      reviews: "最高人氣"
-    };
-
-    const costOptions = {
-      default: "不選擇",
-      cost1: "150以內",
-      cost2: "150~600",
-      cost3: "600~1200",
-      cost4: "1200以上"
-    };
-
-    const sortedPlaces = computed(() => {
-      if (sortOrder.value === "distance") {
-        return [...places.value].sort((a, b) => (a.distance || 0) - (b.distance || 0));
-      } else if (sortOrder.value === "rating") {
-        return [...places.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      } else if (sortOrder.value === "reviews") {
-        return [...places.value].sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0));
-      } else {
-        return places.value;
-      }
-    });
-
-    const fetchDataFromLocalStorage = () => {
-      const localStorageUtil = {
-        get(key) {
-          const value = localStorage.getItem(key);
-          return value ? JSON.parse(value) : null;
-        },
-      };
-
-      places.value = localStorageUtil.get("places") || [];
-      sortOrder.value = localStorageUtil.get("sortOrder") || "default";
-    };
-
-    const updateSortOrder = (value) => {
-      sortOrder.value = value;
-      localStorage.setItem("sortOrder", JSON.stringify(value));
-      sortMenu.value = false;
-    };
-
-    const toggleSort = () => {
-      sortMenu.value = !sortMenu.value;
-    };
-
-    const toggleCost = () => {
-      costMenu.value = !costMenu.value;
-    };
-
-
-    onMounted(() => {
-      fetchDataFromLocalStorage();
-      window.addEventListener("places-updated", fetchDataFromLocalStorage);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener("places-updated", fetchDataFromLocalStorage);
-    });
-
-    return {
-      places,
-      sortOrder,
-      costOrder,
-      sortMenu,
-      costMenu,
-      sortOptions,
-      costOptions,
-      sortedPlaces,
-      updateSortOrder,
-      toggleSort,
-      toggleCost
-    };
-  }
+const sortOptions = {
+  default: "預設",
+  distance: "最近距離",
+  rating: "最高評分",
+  reviews: "最高人氣"
 };
+
+const costOptions = {
+  default: "不選擇",
+  cost1: "150以內",
+  cost2: "150~600",
+  cost3: "600~1200",
+  cost4: "1200以上"
+};
+
+const sortedPlaces = computed(() => {
+  if (sortOrder.value === "distance") {
+    return [...places.value].sort((a, b) => (a.distance || 0) - (b.distance || 0));
+  } else if (sortOrder.value === "rating") {
+    return [...places.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else if (sortOrder.value === "reviews") {
+    return [...places.value].sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0));
+  } else {
+    return places.value;
+  }
+});
+
+const fetchDataFromLocalStorage = () => {
+  const localStorageUtil = {
+    get(key) {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    },
+  };
+
+  places.value = localStorageUtil.get("places") || [];
+  sortOrder.value = localStorageUtil.get("sortOrder") || "default";
+};
+
+const updateSortOrder = (value) => {
+  sortOrder.value = value;
+  localStorage.setItem("sortOrder", JSON.stringify(value));
+  sortMenu.value = false;
+};
+
+const toggleSort = () => {
+  sortMenu.value = !sortMenu.value;
+};
+
+const toggleCost = () => {
+  costMenu.value = !costMenu.value;
+};
+
+const handleMouseEnter = (placeId) => {
+  restaurantStore.setHoveredPlace(placeId)
+}
+
+const handleMouseLeave = () => {
+  restaurantStore.setHoveredPlace(null)
+}
+
+onMounted(() => {
+  fetchDataFromLocalStorage();
+  window.addEventListener("places-updated", fetchDataFromLocalStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("places-updated", fetchDataFromLocalStorage);
+});
 </script>

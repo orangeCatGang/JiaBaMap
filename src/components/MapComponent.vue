@@ -2,18 +2,46 @@
   <div ref="mapContainer" style="width: 50%; height: 100vh;"></div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, onUnmounted } from "vue";
+import { useRestaurantStore } from '@/stores/searchPage';
+import { watch } from 'vue'
 import loader from "./googleMapsLoader";
 
-export default {
-  setup() {
+    const store = useRestaurantStore()
+  
     const map = ref(null); // Google 地圖實例
     let markers = []; // 使用普通數組管理標記
     let infoWindows = []; // 管理所有 InfoWindow
     const mapContainer = ref(null); // 地圖 DOM 容器
     const places = ref([]); // 從 Local Storage 加載的地點資料
     const districts = ref([]);
+
+
+    watch(() => store.hoveredPlaceId, (newPlaceId) => {
+      if (!map.value) return
+      
+      markers.forEach(marker => {
+    marker.setIcon(null); // 使用預設的紅色標記
+    marker.setAnimation(null); // 停止任何動畫
+    });
+      // 找到對應的標記
+        const marker = markers.find(m => m.placeId === newPlaceId)
+    if (marker) {
+      if (newPlaceId) {
+        // 放大效果可以通過縮放實現
+        marker.setAnimation(google.maps.Animation.BOUNCE); // 或使用 BOUNCE 效果
+        google.maps.event.trigger(marker, 'click')
+      } else {
+        infoWindows.forEach(window => window.close())
+      }
+    }
+})
+
+
+    
+
+
 
     // 從 Local Storage 加載地點資料
     const fetchPlacesFromLocalStorage = () => {
@@ -64,22 +92,25 @@ export default {
       }
     };
 
-    const updateMarkers = () => {
-      clearMarkers(); // 清除舊的標記
+          const updateMarkers = () => {
+          clearMarkers()
+          places.value.forEach((place) => {
+            const marker = new google.maps.Marker({
+              position: place.geometry.location,
+              map: map.value,
+              title: place.name,
+              placeId: place.place_id  // 保存 placeId 以便後續查找
+            });
 
-      places.value.forEach((place) => {
-        if (!place.geometry || !place.geometry.location) {
-          console.error("無效的地點資料:", place);
-          return;
-        }
-
-        const position = place.geometry.location;
-
-        const marker = new google.maps.Marker({
-          position,
-          map: map.value,
-          title: place.name,
+            // 添加滑鼠事件
+        marker.addListener('mouseover', () => {
+          store.setHoveredPlace(place.place_id)
         });
+
+        marker.addListener('mouseout', () => {
+          store.setHoveredPlace(null)
+        });
+
 
         // 使用 PlacesService 取得地點的詳細資料
         const service = new google.maps.places.PlacesService(map.value);
@@ -202,9 +233,4 @@ export default {
       window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
     });
 
-    return {
-      mapContainer,
-    };
-  },
-};
 </script>
