@@ -20,7 +20,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const openNow = ref("");
   const storePhoto = ref("");
   const googleMapsUri = ref("");
-  
+  const cachedItemsPerPage = ref(3);
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
   const currentGroupIndex = ref(0);
@@ -146,6 +146,24 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     }
   }
   
+  // 處理分頁切換
+  const handlePrevGroup = () => {
+    if (recommendedGroupIndex.value <= 0) {
+      recommendedGroupIndex.value = maxRecommendedGroupIndex.value;
+    } else {
+      recommendedGroupIndex.value--;
+    }
+  };
+
+  const handleNextGroup = () => {
+    if (recommendedGroupIndex.value >= maxRecommendedGroupIndex.value) {
+      recommendedGroupIndex.value = 0;
+    } else {
+      recommendedGroupIndex.value++;
+    }
+};
+
+
   // maxGroupIndex 計算
   const maxGroupIndex = computed(() => {
     if (!similarRestaurants.value?.length) return 0;
@@ -179,27 +197,24 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   };
 
    // displayRestaurants 計算
-  const displayRestaurants = computed(() => {
+   const displayRestaurants = computed(() => {
     const restaurants = similarRestaurants.value || [];
     if (!restaurants.length) return [];
-    
+
     const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
-    const start = currentGroupIndex.value * itemsPerPage;
-    
-    let allRestaurants = [];
-    while (allRestaurants.length < totalItems) {
-      allRestaurants = [...allRestaurants, ...restaurants];
+    if (itemsPerPage !== cachedItemsPerPage.value) {
+        cachedItemsPerPage.value = itemsPerPage;
+        currentGroupIndex.value = 0; // 重置當前頁碼
     }
-    allRestaurants = allRestaurants.slice(0, totalItems);
-    
-    return allRestaurants
-      .slice(start, start + itemsPerPage)
-      .map((restaurant, index) => ({
+
+    const start = currentGroupIndex.value * cachedItemsPerPage.value;
+    const end = start + cachedItemsPerPage.value;
+
+    return restaurants.slice(start, end).map((restaurant, index) => ({
         ...restaurant,
         uniqueId: `${restaurant.place_id}-${currentGroupIndex.value}-${index}`
-      }));
-  });
-
+    }));
+});
 
   // 推薦餐廳的方法
   const nextRecommendedGroup = () => {
@@ -229,25 +244,31 @@ const maxRecommendedGroupIndex = computed(() => {
 });
 
 // 修改 displayRecommendedRestaurants 計算
+// 修改 displayRecommendedRestaurants 計算
 const displayRecommendedRestaurants = computed(() => {
   const restaurants = recommendedRestaurants.value || [];
   if (!restaurants.length) return [];
 
   const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
   const start = recommendedGroupIndex.value * itemsPerPage;
-  
-  // 當資料不足時，重複資料來填滿所有頁面
-  let repeatedData = [];
-  while (repeatedData.length < 12) { // 確保至少有 12 筆資料
-    repeatedData = [...repeatedData, ...restaurants];
+
+  // 確保每頁都是唯一的餐廳資料
+  const uniqueRestaurants = new Set();
+  const result = [];
+
+  while (result.length < itemsPerPage && uniqueRestaurants.size < restaurants.length) {
+      const randomIndex = Math.floor(Math.random() * restaurants.length);
+      const restaurant = restaurants[randomIndex];
+      if (!uniqueRestaurants.has(restaurant.place_id)) {
+          uniqueRestaurants.add(restaurant.place_id);
+          result.push({
+              ...restaurant,
+              uniqueId: `${restaurant.place_id}-${recommendedGroupIndex.value}-${result.length}`
+          });
+      }
   }
-  
-  return repeatedData
-    .slice(start, start + itemsPerPage)
-    .map((restaurant, index) => ({
-      ...restaurant,
-      uniqueId: `${restaurant.place_id}-${recommendedGroupIndex.value}-${index}`
-    }));
+
+  return result;
 });
   
   // 獲取推薦餐廳（不同種類）
@@ -354,6 +375,9 @@ const resetGroupIndex = () => {
     currentGroupIndex,
     maxGroupIndex,
     displayRestaurants,
+    groupSize,
+    handlePrevGroup,
+    handleNextGroup,
     nextGroup,
     prevGroup,
     fetchSimilarRestaurants,

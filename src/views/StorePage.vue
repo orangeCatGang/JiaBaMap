@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed, watch  } from 'vue';
+import { onMounted, ref, computed, watch, onUnmounted  } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRestaurantStore } from '../stores/storePage';
 import StoreComment from '../components/storeComment/StoreComment.vue'
@@ -32,6 +32,10 @@ onMounted(async () => {
             "25.0443785,121.5467236",
             1000
         );
+        
+        currentGroupSize.value = getInitialGroupSize();
+        window.addEventListener('resize', handleResize);
+
         console.log('Recommended restaurants fetched');
         
         await restaurantStore.fetchSearchTopics();
@@ -40,6 +44,10 @@ onMounted(async () => {
     } catch (error) {
         console.error('數據載入錯誤：', error);
     }
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
 });
 
 const {
@@ -67,7 +75,7 @@ const {
     recommendedGroupIndex,
     maxRecommendedGroupIndex,
     displayRecommendedRestaurants,
-
+    
     // 靜態地圖
     staticMapUrl,
     
@@ -77,46 +85,80 @@ const {
 
 
 const {
-    nextGroup,
-    prevGroup,
+    nextGroup: handleNextGroup,
+    prevGroup: handlePrevGroup,
     nextRecommendedGroup,
     prevRecommendedGroup
 } = restaurantStore;
 
-// 添加事件處理函數
-const handlePrevGroup = () => {
-  if (!displayRestaurants.value.length) return; // 如果沒有數據，不執行
-  if (currentGroupIndex.value <= 0) {
-    currentGroupIndex.value = maxGroupIndex.value;
-  } else {
-    currentGroupIndex.value--;
+
+const currentGroupSize = ref(3); // 預設值
+const stableGroups = ref([]);
+
+
+// 監聽視窗大小變化
+function handleResize() {
+  const newGroupSize = getInitialGroupSize();
+  if (newGroupSize !== currentGroupSize.value) {
+    currentGroupSize.value = newGroupSize;
+    // 重新分組但保持當前頁的相對位置
+    const currentFirstItem = recommendedGroupIndex.value * currentGroupSize.value;
+    createStableGroups(recommendedRestaurants.value);
+    // 計算新的分組索引
+    recommendedGroupIndex.value = Math.floor(currentFirstItem / newGroupSize);
   }
+}
+
+// 計算當前要顯示的餐廳組
+const currentDisplayGroup = computed(() => {
+  return stableGroups.value[recommendedGroupIndex.value] || [];
+});
+
+// 監聽原始數據變化，重新進行分組
+watch([() => recommendedRestaurants.value, currentGroupSize], ([newRestaurants]) => {
+  if (newRestaurants && newRestaurants.length > 0) {
+    createStableGroups(newRestaurants);
+  }
+}, { immediate: true });
+
+// 創建固定的分組
+const createStableGroups = (restaurants) => {
+  const groups = [];
+  for (let i = 0; i < restaurants.length; i += currentGroupSize.value) {
+    groups.push(restaurants.slice(i, i + currentGroupSize.value));
+  }
+  stableGroups.value = groups;
 };
 
-const handleNextGroup = () => {
-  if (!displayRestaurants.value.length) return; // 如果沒有數據，不執行
-  if (currentGroupIndex.value >= maxGroupIndex.value) {
-    currentGroupIndex.value = 0;
-  } else {
-    currentGroupIndex.value++;
+
+
+// 根據螢幕寬度決定每組顯示數量
+function getInitialGroupSize() {
+  if (window.innerWidth < 768) {  // mobile
+    return 2;
+  } else if (window.innerWidth < 1024) {  // tablet
+    return 3;
+  } else {  // desktop
+    return 3;
   }
-};
+}
+
 
 // 同樣為推薦餐廳添加處理函數
 const handlePrevRecommendedGroup = () => {
-    if (recommendedGroupIndex.value <= 0) {
-        recommendedGroupIndex.value = maxRecommendedGroupIndex.value;
-    } else {
-        recommendedGroupIndex.value--;
-    }
+  if (recommendedGroupIndex.value <= 0) {
+    recommendedGroupIndex.value = maxRecommendedGroupIndex.value;
+  } else {
+    recommendedGroupIndex.value--;
+  }
 };
 
 const handleNextRecommendedGroup = () => {
-    if (recommendedGroupIndex.value >= maxRecommendedGroupIndex.value) {
-        recommendedGroupIndex.value = 0;
-    } else {
-        recommendedGroupIndex.value++;
-    }
+  if (recommendedGroupIndex.value >= maxRecommendedGroupIndex.value) {
+    recommendedGroupIndex.value = 0;
+  } else {
+    recommendedGroupIndex.value++;
+  }
 };
 
 
@@ -240,93 +282,138 @@ document.addEventListener('click', handleDocumentClick);
 
 
             <!-- 相似餐廳區 -->
-<div class="mt-10 text-gray-700 md:w-[900px] mx-auto">
-    <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的相似餐廳</h3>
-    <div v-if="displayRestaurants && displayRestaurants.length" class="flex items-center justify-center space-x-4">
-        <!-- 左側切換按鈕 -->
-        <button @click="handlePrevGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-            ←
-        </button>
+                <div class="mt-10 text-gray-700 md:w-[900px] mx-auto">
+                    <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的相似餐廳</h3>
+                    <div v-if="displayRestaurants && displayRestaurants.length" class="flex items-center justify-center space-x-4">
+                        <!-- 左側切換按鈕 -->
+                        <button @click="handlePrevGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
+                            ←
+                        </button>
 
-        <!-- 餐廳展示區 -->
-        <div class="relative w-full overflow-hidden">
-            <transition-group name="slide" tag="div" class="flex">
-                <div v-for="(restaurant, index) in displayRestaurants" :key="restaurant.uniqueId || index" class="flex-shrink-0 w-1/2 md:w-1/3 px-2">
-                    <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px] mx-auto">
-                        <div class="h-40 overflow-hidden">
-                            <img v-if="restaurant?.photoUrl" :src="restaurant.photoUrl" :alt="restaurant.name" class="w-full h-40 object-cover rounded-t-lg" />
+                        <!-- 餐廳展示區 -->
+                        <div class="relative w-full overflow-hidden">
+                            <transition-group name="slide" tag="div" class="flex">
+                                <div v-for="(restaurant, index) in displayRestaurants" :key="restaurant.uniqueId || index" class="flex-shrink-0 w-1/2 md:w-1/3 px-2">
+                                    <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px] mx-auto">
+                                        <div class="h-40 overflow-hidden">
+                                            <img v-if="restaurant?.photoUrl" :src="restaurant.photoUrl" :alt="restaurant.name" class="w-full h-40 object-cover rounded-t-lg" />
+                                        </div>
+                                        <div class="p-4">
+                                            <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant?.name }}</h4>
+                                            <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
+                                                <p class="text-white bg-amber-500 px-2 rounded-full w-fit text-center">
+                                                    評分: {{ restaurant?.rating }}★
+                                                </p>
+                                                <p class="text-sm text-gray-400">
+                                                    {{ restaurant?.userRatingCount }}則評論
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </transition-group>
                         </div>
-                        <div class="p-4">
-                            <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant?.name }}</h4>
-                            <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
-                                <p class="text-white bg-amber-500 px-2 rounded-full w-fit">
+
+                        <!-- 右側切換按鈕 -->
+                        <button @click="handleNextGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
+                            →
+                        </button>
+                    </div>
+
+                    <!-- 如果沒有數據顯示加載狀態 -->
+                    <div v-else class="text-center py-4">
+                        正在加載餐廳資料...
+                    </div>
+
+                    <!-- 頁碼指示器 -->
+                    <div v-if="displayRestaurants && displayRestaurants.length" class="flex justify-center mt-4 space-x-2">
+                        <div v-for="index in (maxGroupIndex + 1)" :key="index" :class="['w-2 h-2 rounded-full cursor-pointer', currentGroupIndex === index - 1 ? 'bg-amber-500' : 'bg-gray-300']" @click="currentGroupIndex = index - 1"></div>
+                    </div>
+                </div>
+
+
+
+                <!-- 推薦餐廳部分 -->
+                <div class="mt-10 text-gray-700 md:w-[900px] mx-auto">
+                    <h3 class="mb-2 text-2xl font-bold">推薦餐廳</h3>
+                    
+                    <div v-if="currentDisplayGroup.length" class="flex items-center justify-center space-x-4">
+                    <!-- 左側切換按鈕 -->
+                    <button 
+                    @click="handlePrevRecommendedGroup"
+                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    >
+                    ←
+                    </button>
+
+                    <!-- 餐廳展示區 -->
+                    <div class="relative w-full overflow-hidden">
+                        <transition-group name="slide" tag="div" class="flex justify-center">
+                        <div 
+                            v-for="restaurant in currentDisplayGroup" 
+                            :key="restaurant.uniqueId || restaurant.name" 
+                            :class="[
+                            'flex-shrink-0 px-2',
+                            currentGroupSize === 2 ? 'w-1/2' : 'w-1/3'
+                            ]"
+                        >
+                            <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px] mx-auto">
+                            <div class="h-40 overflow-hidden">
+                                <img 
+                                v-if="restaurant?.photoUrl" 
+                                :src="restaurant.photoUrl" 
+                                :alt="restaurant.name" 
+                                class="w-full h-40 object-cover rounded-t-lg"
+                                />
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-bold text-lg truncate max-md:text-center">
+                                {{ restaurant?.name }}
+                                </h4>
+                                <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
+                                <p class="text-white bg-amber-500 px-2 rounded-full w-fit text-center">
                                     評分: {{ restaurant?.rating }}★
                                 </p>
                                 <p class="text-sm text-gray-400">
                                     {{ restaurant?.userRatingCount }}則評論
                                 </p>
+                                </div>
+                            </div>
                             </div>
                         </div>
+                        </transition-group>
+                    </div>
+
+                    <!-- 右側切換按鈕 -->
+                    <button 
+                    @click="handleNextRecommendedGroup"  
+                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    >
+                    →
+                    </button>
+                </div>
+
+                    <!-- 加載狀態 -->
+                    <div v-else class="text-center py-4">
+                    正在加載餐廳資料...
+                    </div>
+
+                    <!-- 分頁指示器 -->
+                    <div 
+                    v-if="stableGroups.length > 0" 
+                    class="flex justify-center mt-4 space-x-2"
+                    >
+                    <div
+                    v-for="(_, index) in stableGroups"
+                    :key="index"
+                    :class="[
+                        'w-2 h-2 rounded-full cursor-pointer',
+                        recommendedGroupIndex === index ? 'bg-amber-500' : 'bg-gray-300'
+                    ]"
+                    @click="recommendedGroupIndex = index"
+                    />
                     </div>
                 </div>
-            </transition-group>
-        </div>
-
-        <!-- 右側切換按鈕 -->
-        <button @click="handleNextGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-            →
-        </button>
-    </div>
-
-    <!-- 如果沒有數據顯示加載狀態 -->
-    <div v-else class="text-center py-4">
-        正在加載餐廳資料...
-    </div>
-
-    <!-- 頁碼指示器 -->
-    <div v-if="displayRestaurants && displayRestaurants.length" class="flex justify-center mt-4 space-x-2">
-        <div v-for="index in (maxGroupIndex + 1)" :key="index" :class="['w-2 h-2 rounded-full cursor-pointer', currentGroupIndex === index - 1 ? 'bg-amber-500' : 'bg-gray-300']" @click="currentGroupIndex = index - 1"></div>
-    </div>
-</div>
-
-
-
-                <div class="mt-10 text-gray-700 md:w-[900px] mx-auto">
-    <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的其他推薦餐廳</h3>
-    <div class="flex items-center justify-center space-x-4">
-        <button @click="handlePrevRecommendedGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-            ←
-        </button>
-
-        <div class="relative w-full overflow-hidden">
-            <transition-group name="slide" tag="div" class="flex">
-                <div v-for="restaurant in displayRecommendedRestaurants" :key="restaurant.uniqueId" class="flex-shrink-0 w-1/2 md:w-1/3 px-2">
-                    <div class="bg-white rounded-lg shadow-md mb-4 mx-auto max-w-[250px]">
-                        <div class="h-40 overflow-hidden">
-                            <img v-if="restaurant.photoUrl" :src="restaurant.photoUrl" :alt="restaurant.name" class="w-full h-40 object-cover rounded-t-lg" />
-                        </div>
-                        <div class="p-4">
-                            <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant.name }}</h4>
-                            <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
-                                <p class="text-white bg-amber-500 rounded-full px-2 w-fit">評分: {{ restaurant.rating }}★</p>
-                                <p class="text-sm text-gray-400">{{ restaurant.userRatingCount }}則評論</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </transition-group>
-        </div>
-
-        <button @click="handleNextRecommendedGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
-            →
-        </button>
-    </div>
-
-    <!-- 頁碼指示器 -->
-    <div class="flex justify-center mt-4 space-x-2">
-        <div v-for="index in maxRecommendedGroupIndex + 1" :key="index" :class="['w-2 h-2 rounded-full cursor-pointer', recommendedGroupIndex === index - 1 ? 'bg-amber-500' : 'bg-gray-300']" @click="recommendedGroupIndex = index - 1"></div>
-    </div>
-</div>
 
                 <!-- 搜尋相關主題 -->
                 <div class="mt-8">
