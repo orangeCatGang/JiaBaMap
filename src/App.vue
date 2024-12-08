@@ -4,8 +4,9 @@ import Footer from './components/Footer.vue'; // 引入 Footer 組件
 import RestaurantCard from './components/RestaurantCard.vue';
 import MapComponent from './components/MapComponent.vue';
 import FilterBar from './components/FilterBar.vue';
+import Login from './components/Login.vue';
 
-
+import { ref, onMounted } from "vue";
 export default {
   components: {
     Header,
@@ -13,12 +14,16 @@ export default {
     RestaurantCard,
     MapComponent,
     Footer,
+    Login
   },
 };
+
 
 </script>
 
 <template>
+  
+  <Login /> 
     <!-- <Header /> -->
     <!-- <FilterBar /> -->
     <div class="overflow-x-auto hide-scrollbar">

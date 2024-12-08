@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import loader from "../components/googleMapsLoader";
 import StoreType from "../components/HomePage/StoreType.vue"
 
+import Login from '../components/Login.vue';
+
 // Local Storage 工具方法
 const localStorageUtil = {
   set(key, value) {
@@ -18,6 +20,7 @@ const localStorageUtil = {
 export default {
   components: {
     StoreType,
+    Login,
   },
   setup() {
     // 控制選單開關的狀態
@@ -45,6 +48,18 @@ export default {
       }
     };
 
+    const showLoginModal = ref(false); // 是否顯示登錄小畫面
+
+    // 開啟登錄小畫面
+    const openLoginModal = () => {
+      showLoginModal.value = true;
+    };
+
+    // 關閉登錄小畫面
+    const closeLoginModal = () => {
+      showLoginModal.value = false;
+    };
+
     // 在元件掛載和卸載時設置和移除事件監聽器
     onMounted(() => {
       window.addEventListener("resize", checkScreenWidth);
@@ -59,7 +74,10 @@ export default {
     return {
       isMenuOpen,
       toggleMenu,
-      menuContainer
+      menuContainer,
+      showLoginModal,
+      openLoginModal,
+      closeLoginModal
     };
   },
   data() {
@@ -169,6 +187,8 @@ export default {
         <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 主選單 -->
           <div class="items-center space-x-4 md:flex main-menu">
+            <button  class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
+            <Login :visible="showLoginModal" @close="closeLoginModal" />
             <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
             <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
             <!-- 店家專區的下拉選單 -->
