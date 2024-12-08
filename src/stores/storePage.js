@@ -20,6 +20,8 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const openNow = ref("");
   const storePhoto = ref("");
   const googleMapsUri = ref("");
+  const bannerPhoto = ref("");
+  
   const cachedItemsPerPage = ref(3);
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
@@ -40,52 +42,59 @@ export const useRestaurantStore = defineStore("restaurant", () => {
 };
   
 
+  const photoIds = [];
   const fetchPlaceDetail = async () => {
-    const apiBaseUrl = import.meta.env.VITE_PLACES_DETAIL_API_BASE_URL;
-    const apiKey = import.meta.env.VITE_API_KEY;
-    // FIXME
-    const placesName = "places/ChIJPwFtMx-oQjQRyDjE21ZvByc";
-    const fieldsMask =
-      "id,displayName,photos,formattedAddress,googleMapsUri,currentOpeningHours,nationalPhoneNumber,priceRange,rating,websiteUri,userRatingCount";
-    const langCode = "zh-TW";
+    // // FIXME
+    const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc";
 
+    //串接後端API
     try {
       const res = await fetch(
-        `${apiBaseUrl}${placesName}?fields=${fieldsMask}&key=${apiKey}&languageCode=${langCode}`
+        `http://localhost:3000/restaurants/details?id=${placesId}`
       );
       const resJson = await res.json();
 
-      storeName.value = resJson.displayName.text;
+      storeName.value = resJson.displayName;
       rating.value = resJson.rating;
       userRatingCount.value = resJson.userRatingCount;
-      startPrice.value = resJson.priceRange.startPrice.units;
-      endPrice.value = resJson.priceRange.endPrice.units;
-      weekdayDescriptions.value =
-        resJson.currentOpeningHours.weekdayDescriptions;
+      startPrice.value = resJson.startPrice;
+      endPrice.value = resJson.endPrice;
+      weekdayDescriptions.value = resJson.weekdayDescriptions;
       formattedAddress.value = resJson.formattedAddress;
       websiteUri.value = resJson.websiteUri;
       nationalPhoneNumber.value = resJson.nationalPhoneNumber;
       googleMapsUri.value = resJson.googleMapsUri;
-      openNow.value = resJson.currentOpeningHours.openNow;
+      openNow.value = resJson.openNow;
+      resJson.photoIds.forEach((id) => {
+        photoIds.push(id);
+      }); //一個array含兩組id
+      console.log(photoIds);
     } catch (err) {
       console.log("Failed to fetch place detail from Google API.");
       console.log(err);
     }
   };
 
-  const fetchPhotos = async () => {
-    const apiBaseUrl = import.meta.env.VITE_PHOTOS_API_BASE_URL;
-    const apiKey = import.meta.env.VITE_API_KEY;
-    // FIXME
-    const photosName =
-      "places/ChIJPwFtMx-oQjQRyDjE21ZvByc/photos/AdDdOWrh62xmB7s8LhxpSHRtikDhi4_XyMKnQGP9aYKB-KCZrfdYTSsumwrfvoQu6YMI-X4_5wJJUH--CLZnYoySKfLDioyHMqyOfGf_3hxcT_jlfGW-Yla5yrv-6a3HDpvzfk3JhTVgDs8Ka3wguYr-VRwuxFT2NQ-KmMLW";
-
+  const fetchStorePhoto = async () => {
     try {
       const res = await fetch(
-        `${apiBaseUrl}${photosName}/media?key=${apiKey}&maxHeightPx=800&maxWidthPx=800`
+        `http://localhost:3000/restaurants/photo?id=${photoIds[0]}`
       );
       console.log(res);
       storePhoto.value = URL.createObjectURL(await res.blob());
+    } catch (err) {
+      console.log("Failed to fetch place photos from Google API.");
+      console.log(err);
+    }
+  };
+
+  const fetchBannerPhoto = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/restaurants/photo?id=${photoIds[1]}`
+      );
+      console.log(res);
+      bannerPhoto.value = URL.createObjectURL(await res.blob());
     } catch (err) {
       console.log("Failed to fetch place photos from Google API.");
       console.log(err);
@@ -97,15 +106,17 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     const zoom = 15; // 縮放級別
     const size = "160x160"; // 地圖大小
     const marker = "color:red|label"; // 標記點樣式
-    
+
     // 如果沒有位置資訊，返回空
     if (!formattedAddress.value) return null;
-    
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(formattedAddress.value)}&zoom=${zoom}&size=${size}&markers=${marker}|${encodeURIComponent(formattedAddress.value)}&key=${apiKey}`;
+
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(
+      formattedAddress.value
+    )}&zoom=${zoom}&size=${size}&markers=${marker}|${encodeURIComponent(
+      formattedAddress.value
+    )}&key=${apiKey}`;
   });
 
-
-  
   // 獲取類似餐廳
   const fetchSimilarRestaurants = async (apiKey, location, radius) => {
     const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=restaurant&key=${apiKey}`
@@ -116,15 +127,18 @@ export const useRestaurantStore = defineStore("restaurant", () => {
       const res = await fetch(proxyUrl + apiUrl)
   
       if (!res.ok) {
-        throw new Error(`HTTP Error: ${res.status}`)
+        throw new Error(`HTTP Error: ${res.status}`);
       }
   
       const resJson = await res.json()
       console.log('API Response:', resJson); // 添加这行来查看 API 返回的数据
       
       if (resJson.status !== "OK") {
-        console.error(`Google API Error: ${resJson.status}`, resJson.error_message)
-        return
+        console.error(
+          `Google API Error: ${resJson.status}`,
+          resJson.error_message
+        );
+        return;
       }
   
       similarRestaurants.value = resJson.results.map((restaurant) => ({
@@ -142,7 +156,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
       console.log('Mapped restaurants:', similarRestaurants.value); // 添加这行查看处理后的数据
       resetGroupIndex()
     } catch (err) {
-      console.error("Fetch error:", err.message)
+      console.error("Fetch error:", err.message);
     }
   }
   
@@ -274,34 +288,36 @@ const displayRecommendedRestaurants = computed(() => {
   // 獲取推薦餐廳（不同種類）
   const fetchRecommendedRestaurants = async (apiKey, location, radius) => {
     // 定義不同的餐廳類型
-    const restaurantTypes = ['cafe', 'bakery', 'bar', 'meal_takeaway'];
+    const restaurantTypes = ["cafe", "bakery", "bar", "meal_takeaway"];
     let allRestaurants = [];
 
     try {
       // 為每種類型獲取餐廳
       for (const type of restaurantTypes) {
         const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`;
-        
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+
+        const proxyUrl = "https://cors-anywhere.herokuapp.com/";
         const res = await fetch(proxyUrl + apiUrl);
 
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
         const resJson = await res.json();
-        
+
         if (resJson.status === "OK") {
           // 從每種類型選取前幾個結果
-          const typeRestaurants = resJson.results.slice(0, 3).map((restaurant) => ({
-            name: restaurant.name,
-            rating: restaurant.rating || "N/A",
-            userRatingCount: restaurant.user_ratings_total || 0,
-            photoUrl: restaurant.photos
-              ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${apiKey}`
-              : null,
-            place_id: restaurant.place_id,
-            type: type // 添加類型標記
-          }));
-          
+          const typeRestaurants = resJson.results
+            .slice(0, 3)
+            .map((restaurant) => ({
+              name: restaurant.name,
+              rating: restaurant.rating || "N/A",
+              userRatingCount: restaurant.user_ratings_total || 0,
+              photoUrl: restaurant.photos
+                ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${apiKey}`
+                : null,
+              place_id: restaurant.place_id,
+              type: type, // 添加類型標記
+            }));
+
           allRestaurants = [...allRestaurants, ...typeRestaurants];
         }
       }
@@ -330,19 +346,18 @@ const resetGroupIndex = () => {
       const apiBaseUrl = import.meta.env.VITE_SEARCH_TOPICS_API_BASE_URL;
       const apiKey = import.meta.env.VITE_API_KEY;
       const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc"; // 替換為實際的 placesId
-  
+
       const res = await fetch(
         `${apiBaseUrl}/topics?placesId=${placesId}&key=${apiKey}`
       );
       const resJson = await res.json();
-  
+
       searchTopics.value = resJson.topics || [];
     } catch (err) {
       console.log("Failed to fetch search topics from API.");
       console.log(err);
     }
   };
-
 
   return {
     // 視窗相關
@@ -361,13 +376,15 @@ const resetGroupIndex = () => {
     websiteUri,
     nationalPhoneNumber,
     storePhoto,
+    bannerPhoto,
     storeMap,
     googleMapsUri,
     openNow,
     
     // API 方法
     fetchPlaceDetail,
-    fetchPhotos,
+    fetchStorePhoto,
+    fetchBannerPhoto,
     staticMapUrl,
     
     // 相似餐廳相關

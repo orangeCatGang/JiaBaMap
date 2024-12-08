@@ -17,8 +17,11 @@ onMounted(async () => {
         await restaurantStore.fetchPlaceDetail();
         console.log('Place details fetched');
         
-        await restaurantStore.fetchPhotos();
-        console.log('Photos fetched');
+        await restaurantStore.fetchStorePhoto();
+        console.log('storePhoto fetched');
+
+        await restaurantStore.fetchBannerPhoto();
+        console.log('bannerPhoto fetched')
         
         await restaurantStore.fetchSimilarRestaurants(
             import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -63,6 +66,7 @@ const {
     googleMapsUri,
     openNow,
     storePhoto,
+    bannerPhoto,
     // 相似餐廳相關
     similarRestaurants,
     currentGroupIndex,
@@ -190,7 +194,8 @@ document.addEventListener('click', handleDocumentClick);
         <Header/>
         <!-- 橫幅圖片區 -->
         <div class="relative">
-            <img src="../assets/logo.jpg" alt="Banner" class="object-cover w-full h-48">
+            <img v-if="bannerPhoto" :src="bannerPhoto" alt="Banner" class="object-cover w-full h-48">
+            <img v-else src="../assets/logo.jpg" alt="Banner" class="object-cover w-full h-48">
             <!-- <div class="absolute top-0 left-0 p-4 text-2xl text-white bg-black bg-opacity-50">
             和牛涮 日式鍋物放題 台南中華西店
             </div> -->
