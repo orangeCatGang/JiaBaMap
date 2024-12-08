@@ -1,7 +1,12 @@
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, onErrorCaptured } from "vue";
 import { defineStore } from "pinia";
 
 export const useRestaurantStore = defineStore("restaurant", () => {
+  const windowWidth = ref(window.innerWidth);
+  const groupSize = ref(3);
+  const totalItems = 20;
+
+  // 基本資料的 ref
   const storeName = ref("");
   const rating = ref("");
   const userRatingCount = ref("");
@@ -16,20 +21,6 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
 
-
-  const groupSize = ref(3);
-  const totalItems = 20; // 卡片總數
-  
-  // 修改後的視窗監聽器，處理不同斷點
-  const initializeWindowListener = () => {
-    const updateGroupSize = () => {
-      groupSize.value = window.innerWidth >= 768 ? 3 : 2;
-    };
-
-    window.addEventListener('resize', updateGroupSize);
-    updateGroupSize();
-  };
-  
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
   const currentGroupIndex = ref(0);
@@ -37,8 +28,17 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   // 推薦餐廳相關狀態
   const recommendedRestaurants = ref([]);
   const recommendedGroupIndex = ref(0);
-
   const searchTopics = ref([]);
+  
+ // 視窗監聽器
+  const initializeWindowListener = () => {
+  const updateSize = () => {
+    windowWidth.value = window.innerWidth;
+  };
+  window.addEventListener('resize', updateSize);
+  updateSize();
+};
+  
 
   const fetchPlaceDetail = async () => {
     const apiBaseUrl = import.meta.env.VITE_PLACES_DETAIL_API_BASE_URL;
@@ -109,22 +109,24 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   // 獲取類似餐廳
   const fetchSimilarRestaurants = async (apiKey, location, radius) => {
     const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=restaurant&key=${apiKey}`
-
+  
     try {
+      console.log('Fetching similar restaurants...');
       const proxyUrl = 'https://cors-anywhere.herokuapp.com/'
       const res = await fetch(proxyUrl + apiUrl)
-
+  
       if (!res.ok) {
         throw new Error(`HTTP Error: ${res.status}`)
       }
-
+  
       const resJson = await res.json()
+      console.log('API Response:', resJson); // 添加这行来查看 API 返回的数据
       
       if (resJson.status !== "OK") {
         console.error(`Google API Error: ${resJson.status}`, resJson.error_message)
         return
       }
-
+  
       similarRestaurants.value = resJson.results.map((restaurant) => ({
         name: restaurant.name,
         rating: restaurant.rating || "N/A",
@@ -137,22 +139,20 @@ export const useRestaurantStore = defineStore("restaurant", () => {
           : null,
         place_id: restaurant.place_id
       }))
+      console.log('Mapped restaurants:', similarRestaurants.value); // 添加这行查看处理后的数据
       resetGroupIndex()
     } catch (err) {
       console.error("Fetch error:", err.message)
     }
   }
   
-    // 修改後的 maxGroupIndex 計算，處理不同螢幕大小
+  // maxGroupIndex 計算
   const maxGroupIndex = computed(() => {
     if (!similarRestaurants.value?.length) return 0;
-    
-    // 螢幕 >= 768px: 7頁 (20張卡片 / 每頁3張 ≈ 7)
-    // 螢幕 < 768px: 10頁 (20張卡片 / 每頁2張 = 10)
-    return window.innerWidth >= 768 
-      ? Math.ceil(totalItems / 3) - 1  // 7頁 (0-6)
-      : Math.ceil(totalItems / 2) - 1; // 10頁 (0-9)
+    const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
+    return Math.ceil(totalItems / itemsPerPage) - 1;
   });
+
 
   // 當前頁面顯示的餐廳
   const currentGroupRestaurants = computed(() => {
@@ -161,8 +161,8 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     return similarRestaurants.value.slice(start, end);
   });
 
-   // 修改後的導航方法，處理新的分頁邏輯
-   const nextGroup = () => {
+   // 修改導航方法以使用新的計算邏輯
+  const nextGroup = () => {
     if (currentGroupIndex.value >= maxGroupIndex.value) {
       currentGroupIndex.value = 0;
     } else {
@@ -178,46 +178,28 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     }
   };
 
-   // 修改後的 displayRestaurants 計算
-   const displayRestaurants = computed(() => {
+   // displayRestaurants 計算
+  const displayRestaurants = computed(() => {
     const restaurants = similarRestaurants.value || [];
     if (!restaurants.length) return [];
     
-    const currentGroupSize = window.innerWidth >= 768 ? 3 : 2;
-    const start = currentGroupIndex.value * currentGroupSize;
-    const end = start + currentGroupSize;
+    const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
+    const start = currentGroupIndex.value * itemsPerPage;
     
-    // 如果需要填充空位，使用開頭的項目
-    let slicedRestaurants = restaurants.slice(start, end);
-    while (slicedRestaurants.length < currentGroupSize && restaurants.length > 0) {
-      slicedRestaurants = [
-        ...slicedRestaurants,
-        ...restaurants.slice(0, currentGroupSize - slicedRestaurants.length)
-      ];
+    let allRestaurants = [];
+    while (allRestaurants.length < totalItems) {
+      allRestaurants = [...allRestaurants, ...restaurants];
     }
+    allRestaurants = allRestaurants.slice(0, totalItems);
     
-    return slicedRestaurants;
+    return allRestaurants
+      .slice(start, start + itemsPerPage)
+      .map((restaurant, index) => ({
+        ...restaurant,
+        uniqueId: `${restaurant.place_id}-${currentGroupIndex.value}-${index}`
+      }));
   });
 
-  console.log(similarRestaurants.value);
-  // 重置组索引
-
-  // 推薦餐廳的計算屬性
-  const displayRecommendedRestaurants = computed(() => {
-    const restaurants = recommendedRestaurants.value || [];
-    if (!restaurants.length) return [];
-    
-    const remainingSlots = (restaurants.length % groupSize.value);
-    if (remainingSlots > 0) {
-        return [...restaurants, ...restaurants.slice(0, groupSize.value - remainingSlots)];
-    }
-    return restaurants;
-});
-
-const maxRecommendedGroupIndex = computed(() => {
-  if (!recommendedRestaurants.value?.length) return 0;
-  return Math.max(0, Math.ceil(recommendedRestaurants.value.length / groupSize.value) - 1);
-});
 
   // 推薦餐廳的方法
   const nextRecommendedGroup = () => {
@@ -236,6 +218,33 @@ const maxRecommendedGroupIndex = computed(() => {
     }
 };
 
+
+// 添加推薦餐廳相關的計算屬性
+const maxRecommendedGroupIndex = computed(() => {
+  if (!recommendedRestaurants.value?.length) return 0;
+  const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
+  return Math.ceil(recommendedRestaurants.value.length / itemsPerPage) - 1;
+});
+
+const displayRecommendedRestaurants = computed(() => {
+  const restaurants = recommendedRestaurants.value || [];
+  if (!restaurants.length) return [];
+  
+  const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
+  const start = recommendedGroupIndex.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  
+  // 如果需要循環顯示，可以先創建一個足夠長的數組
+  let displayItems = [...restaurants];
+  while (displayItems.length < end) {
+    displayItems = [...displayItems, ...restaurants];
+  }
+  
+  return displayItems.slice(start, end).map((restaurant, index) => ({
+    ...restaurant,
+    uniqueId: `${restaurant.place_id}-${recommendedGroupIndex.value}-${index}`
+  }));
+});
   
   // 獲取推薦餐廳（不同種類）
   const fetchRecommendedRestaurants = async (apiKey, location, radius) => {
@@ -283,9 +292,10 @@ const maxRecommendedGroupIndex = computed(() => {
     }
   };
   
-  const resetGroupIndex = () => {
-    currentGroupIndex.value = 0;
-    recommendedGroupIndex.value = 0;
+// 重置索引
+const resetGroupIndex = () => {
+  currentGroupIndex.value = 0;
+  recommendedGroupIndex.value = 0;
 };
 
 
@@ -310,6 +320,12 @@ const maxRecommendedGroupIndex = computed(() => {
 
 
   return {
+    // 視窗相關
+    windowWidth,
+    initializeWindowListener,
+    groupSize,
+    
+    // 基本資料
     storeName,
     rating,
     userRatingCount,
@@ -323,10 +339,13 @@ const maxRecommendedGroupIndex = computed(() => {
     storeMap,
     googleMapsUri,
     openNow,
+    
+    // API 方法
     fetchPlaceDetail,
     fetchPhotos,
     staticMapUrl,
-     // 相似餐廳相關
+    
+    // 相似餐廳相關
     similarRestaurants,
     currentGroupIndex,
     maxGroupIndex,
@@ -335,8 +354,6 @@ const maxRecommendedGroupIndex = computed(() => {
     prevGroup,
     fetchSimilarRestaurants,
     
-  
-
     // 推薦餐廳相關
     recommendedRestaurants,
     recommendedGroupIndex,
@@ -345,14 +362,9 @@ const maxRecommendedGroupIndex = computed(() => {
     nextRecommendedGroup,
     prevRecommendedGroup,
     fetchRecommendedRestaurants,
-
-     // 搜尋主題
+    
+    // 其他
     searchTopics,
     fetchSearchTopics,
-    
-    initializeWindowListener,
-    groupSize,
-
-
   };
 });
