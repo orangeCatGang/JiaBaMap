@@ -20,7 +20,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const openNow = ref("");
   const storePhoto = ref("");
   const googleMapsUri = ref("");
-
+  
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
   const currentGroupIndex = ref(0);
@@ -232,17 +232,17 @@ const maxRecommendedGroupIndex = computed(() => {
 const displayRecommendedRestaurants = computed(() => {
   const restaurants = recommendedRestaurants.value || [];
   if (!restaurants.length) return [];
-  
+
   const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
   const start = recommendedGroupIndex.value * itemsPerPage;
   
-  let allRestaurants = [];
-  while (allRestaurants.length < 12) { // 確保有 12 組資料
-    allRestaurants = [...allRestaurants, ...restaurants];
+  // 當資料不足時，重複資料來填滿所有頁面
+  let repeatedData = [];
+  while (repeatedData.length < 12) { // 確保至少有 12 筆資料
+    repeatedData = [...repeatedData, ...restaurants];
   }
-  allRestaurants = allRestaurants.slice(0, 12);
   
-  return allRestaurants
+  return repeatedData
     .slice(start, start + itemsPerPage)
     .map((restaurant, index) => ({
       ...restaurant,
