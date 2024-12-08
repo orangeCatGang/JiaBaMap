@@ -12,8 +12,9 @@
             </div>
 
             <!-- 名稱和數據 -->
-            <div class="text-center mt-4">
-                <h2 class="text-2xl font-bold text-gray-700">{{ username }}</h2>
+             <!-- 若無法順利回傳加入v-if="userData" -->
+            <div class="text-center mt-4" >
+                <h2 class="text-2xl font-bold text-gray-700">{{ userData?.name || username }}</h2>  
                 <div class="flex justify-center space-x-4 text-sm text-gray-500 mt-2">
                     <div>
                         <span class="font-bold text-gray-700">0</span> 餐廳評論
@@ -159,6 +160,8 @@ export default {
             profilePicture: "https://via.placeholder.com/100", // 頭像
             username: "編輯名稱", // 使用者名稱
             instagramUsername: "", // IG 帳號
+
+            userData: null,  //用戶資料
         };
     },
     computed: {
@@ -186,9 +189,9 @@ export default {
         writeReview() {
         alert("撰寫食記功能即將啟用！");
         },
-        logout() {
-        alert("已登出！");
-        },
+        // logout() {
+        // alert("已登出！");
+        // },
         onPhotoChange(event) {
         // 更新頭像
         const file = event.target.files[0];
@@ -196,7 +199,28 @@ export default {
                 this.profilePicture = URL.createObjectURL(file);
             }
         },
+
+        //拿取用戶資料
+        getUserDataFromLocalStorage() {
+          const storedUserData = localStorage.getItem("userData"); 
+          if (storedUserData) {
+            this.userData = JSON.parse(storedUserData); // 
+          }
+        },
+      
+        // 登出後清除資料，返回首頁
+        logout() {
+          localStorage.removeItem("userData"); 
+          this.userData = null; // 
+          this.$router.push({ name: "home" }); 
+        },
     },
+    mounted() {
+  this.$nextTick(() => {
+    this.getUserDataFromLocalStorage();
+  });
+}
+
 };
 </script>
 
