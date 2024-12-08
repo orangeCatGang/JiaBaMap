@@ -219,31 +219,35 @@ export const useRestaurantStore = defineStore("restaurant", () => {
 };
 
 
-// 添加推薦餐廳相關的計算屬性
+// 修改 maxRecommendedGroupIndex 計算
 const maxRecommendedGroupIndex = computed(() => {
   if (!recommendedRestaurants.value?.length) return 0;
+  // 根據螢幕寬度決定每頁顯示數量
   const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
-  return Math.ceil(recommendedRestaurants.value.length / itemsPerPage) - 1;
+  // 計算總頁數
+  return Math.ceil(12 / itemsPerPage) - 1; // 12組資料，大螢幕4頁，小螢幕6頁
 });
 
+// 修改 displayRecommendedRestaurants 計算
 const displayRecommendedRestaurants = computed(() => {
   const restaurants = recommendedRestaurants.value || [];
   if (!restaurants.length) return [];
   
   const itemsPerPage = windowWidth.value >= 768 ? 3 : 2;
   const start = recommendedGroupIndex.value * itemsPerPage;
-  const end = start + itemsPerPage;
   
-  // 如果需要循環顯示，可以先創建一個足夠長的數組
-  let displayItems = [...restaurants];
-  while (displayItems.length < end) {
-    displayItems = [...displayItems, ...restaurants];
+  let allRestaurants = [];
+  while (allRestaurants.length < 12) { // 確保有 12 組資料
+    allRestaurants = [...allRestaurants, ...restaurants];
   }
+  allRestaurants = allRestaurants.slice(0, 12);
   
-  return displayItems.slice(start, end).map((restaurant, index) => ({
-    ...restaurant,
-    uniqueId: `${restaurant.place_id}-${recommendedGroupIndex.value}-${index}`
-  }));
+  return allRestaurants
+    .slice(start, start + itemsPerPage)
+    .map((restaurant, index) => ({
+      ...restaurant,
+      uniqueId: `${restaurant.place_id}-${recommendedGroupIndex.value}-${index}`
+    }));
 });
   
   // 獲取推薦餐廳（不同種類）
