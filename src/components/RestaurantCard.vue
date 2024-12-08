@@ -92,8 +92,8 @@
     <div 
       v-for="place in sortedPlaces" 
       :key="place.place_id"
-      class="flex mt-2 items-center pb-2 border-b transition-colors duration-200"
-      :class="{ 'bg-black': store.hoveredPlaceId === place.place_id }"
+      class="flex mt-2 items-center pb-2 border-b transition-colors duration-200 hover:bg-amber-200"
+      
       @mouseenter="handleMouseEnter(place.place_id)"
       @mouseleave="handleMouseLeave">
       <div class="w-40 h-32 ml-3">
