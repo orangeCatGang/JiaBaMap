@@ -95,20 +95,28 @@ import loader from "./googleMapsLoader";
           const updateMarkers = () => {
           clearMarkers()
           places.value.forEach((place) => {
-            const marker = new google.maps.Marker({
-              position: place.geometry.location,
-              map: map.value,
-              title: place.name,
-              placeId: place.place_id  // 保存 placeId 以便後續查找
-            });
+          const marker = new google.maps.Marker({
+            position: place.geometry.location,
+            map: map.value,
+            title: place.name,
+            placeId: place.place_id
+          });
 
             // 添加滑鼠事件
-        marker.addListener('mouseover', () => {
-          store.setHoveredPlace(place.place_id)
-        });
+            marker.addListener('mouseover', () => {
+            store.setHoveredPlace(place.place_id);
+            google.maps.event.trigger(marker, 'click'); // 觸發 InfoWindow
+            });
 
-        marker.addListener('mouseout', () => {
-          store.setHoveredPlace(null)
+            marker.addListener('mouseover', () => {
+            store.setHoveredPlace(place.place_id);
+            google.maps.event.trigger(marker, 'click');
+            
+            // 新增這段：滾動到對應的餐廳卡片
+            const element = document.querySelector(`[data-place-id="${place.place_id}"]`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         });
 
 
