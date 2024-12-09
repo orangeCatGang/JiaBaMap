@@ -3,6 +3,7 @@
   import loader from "../components/googleMapsLoader.js";
   import { useRouter, useRoute } from "vue-router";
   import debounce from 'lodash/debounce';
+  import { useKeywordStore } from "@/stores/keywordStore";
   
   // Local Storage 工具方法
   const localStorageUtil = {
@@ -34,6 +35,7 @@
       const places = ref([]);
       const userLocation = ref(null);
       const isLocating = ref(false);
+      const keywordStore = useKeywordStore();
       //搜尋範圍
       const districts = reactive({
         "我的位置": null,
@@ -182,7 +184,6 @@
         }
      }
     );
-
 
    const handleEnterKey = async () => {
       if (!keyword.value.replace(/\s+/g, "")) {
