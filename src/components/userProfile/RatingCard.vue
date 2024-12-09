@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useRoute } from "vue-router";
+import { useKeywordStore } from "@/stores/keywordStore";
 
 const restaurants = ref([
   {
@@ -65,15 +65,12 @@ const getRankImage = computed(() => {
   };
 });
 
-
-const router = useRouter();
+const router = useRouter()
+const keywordStore = useKeywordStore()
 
 const navigateToSearch = (tag) => {
-  router.push({
-    path: "/search",
-    query: { keyword: tag },
-  });
-};
+  keywordStore.navigateToSearch(router, tag)
+}
 
 </script>
 

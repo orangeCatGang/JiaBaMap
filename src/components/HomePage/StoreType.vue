@@ -1,15 +1,12 @@
-<script>
-export default {
-  methods: {
-    navigateToSearch(keyword) {
-      // 使用 Vue Router 跳轉並傳遞關鍵字
-      this.$router.push({
-        path: "/search", // 搜尋頁面的路由路徑
-        query: { keyword }, // 傳遞關鍵字作為 URL 參數
-      });
-    },
-  },
-};
+<script setup>
+import { useRouter } from "vue-router";
+import { useKeywordStore } from "@/stores/keywordStore";
+const router = useRouter()
+const keywordStore = useKeywordStore()
+
+const navigateToSearch = (tag) => {
+  keywordStore.navigateToSearch(router, tag)
+}
 </script>
 
 <template>

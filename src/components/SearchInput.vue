@@ -113,7 +113,7 @@
         places.value = [];
         searched.value = false;
   
-        if (!keyword.value.trim()) {
+        if (!keyword.value.replace(/\s+/g, "")) {
           alert("請輸入有效的關鍵字！");
           return;
         }
@@ -185,7 +185,7 @@
 
 
    const handleEnterKey = async () => {
-      if (!keyword.value.trim()) {
+      if (!keyword.value.replace(/\s+/g, "")) {
         alert("請輸入有效的關鍵字！");
         return;
       }
