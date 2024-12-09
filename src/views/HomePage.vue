@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import loader from "../components/googleMapsLoader";
 import StoreType from "../components/HomePage/StoreType.vue"
+import SearchInput from "../components/SearchInput.vue";
 
 import Login from '../components/Login.vue';
 
@@ -21,6 +22,7 @@ export default {
   components: {
     StoreType,
     Login,
+    SearchInput
   },
   setup() {
     // 控制選單開關的狀態
@@ -248,7 +250,7 @@ export default {
         <div ref="menuContainer" class="md:hidden">
           <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
           <div class="flex items-center space-x-4 md:hidden hamburger-menu">
-              <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5 text-amber-500" /></a>
+              <SearchInput />
               <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
               <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
               </button>
@@ -290,36 +292,8 @@ export default {
           <h1 class="z-10 px-3 mt-8 text-3xl text-white md:text-5xl text-bold">想知道哪裡有美食？</h1>
           <h2 class="z-10 px-3 mt-5 text-lg text-white md:text-xl text-bold">從超過 50,000 家精選餐廳中，探索您不知道的熱門美食。</h2>
           <!-- 搜尋欄容器 -->
-          <div class="z-10 flex items-center px-4 mt-10 space-x-2 bg-white border rounded-full shadow-sm border-amber-400 h-11" >
-              <input
-              type="text"
-              v-model="keyword"
-              id="keyword"
-              @keydown.enter="searchPlaces"
-              placeholder="美食分類、餐廳"
-              class="flex-1 py-2 outline-none text-amber-500 placeholder-amber-300"
-              />
-              <!-- 餐具圖標 -->
-              <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500" />
-              <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
-      
-              <!-- 城市選擇按鈕 -->
-              <div class="flex items-center space-x-1 border-[1.5px]  border-amber-100 text-amber-500 rounded-full px-3 py-1">
-                  <!-- <span class=" min-w-16">台南市</span>
-                  <button class="text-sm focus:outline-none">&times;</button> -->
-                  <select class="" v-model="selectedDistrict" id="district">
-                      <option class="bg-white " v-for="(coords, district) in districts" :key="district" :value="district">
-                        {{ district }}
-                      </option>
-                    </select>
-              </div>
-              <!-- 地點圖標 -->
-              <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500" />
-              <!-- 搜索按鈕 -->
-              <button class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none ml-52" @click="searchPlaces"
-              >
-                  <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
-              </button>
+          <div class="z-10 hidden md:flex items-center mt-10 bg-white border rounded-full h-11 ">
+             <SearchInput />
           </div>
       </div>
       <!-- 餐廳分類按鈕 -->

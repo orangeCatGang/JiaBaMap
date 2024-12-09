@@ -1,6 +1,8 @@
 <script>
   import { ref, reactive, computed, watch } from "vue";
-  import loader from "./googleMapsLoader.js";
+  import loader from "../components/googleMapsLoader.js";
+  import { useRouter, useRoute } from "vue-router";
+  import debounce from 'lodash/debounce';
   
   // Local Storage 工具方法
   const localStorageUtil = {
@@ -13,10 +15,18 @@
       return value ? JSON.parse(value) : null;
     },
   };
-  
+
+  const updateLocalStorage = (placesData, sortOrderData, locationData) => {
+    localStorageUtil.set("places", placesData);
+    localStorageUtil.set("sortOrder", sortOrderData);
+    localStorageUtil.set("location", locationData);
+  }
+
   export default {
     setup() {    
       // 搜尋功能
+      const route = useRoute();
+      const router = useRouter();
       const keyword = ref("");
       const selectedDistrict = ref("大安區");
       const sortOrder = ref("default");
@@ -68,9 +78,18 @@
       const degToRad = (deg) => {
         return deg * (Math.PI / 180);
       };
-  
+      
+      // 更新URL Query 
+      const updateQuery = (newKeyword) => {
+        router.push({
+          name: "search", // 確保路由名稱正確
+          query: { ...route.query, keyword: newKeyword },
+        });
+      };
+
       //"我的位置"定位
       const locateUser = () => {
+        if(isLocating.value) return;
         isLocating.value = true;
        
         navigator.geolocation.getCurrentPosition(
@@ -90,7 +109,7 @@
       };
       
       //執行搜尋
-      const searchPlaces = async () => {
+      const debouncedSearchPlaces = debounce(async () => {
         places.value = [];
         searched.value = false;
   
@@ -119,114 +138,136 @@
       lng = district.lng;
     }
   
-        await loader.load();
+    await loader.load();
   
-        const service = new google.maps.places.PlacesService(document.createElement("div"));
+    const service = new google.maps.places.PlacesService(document.createElement("div"));
   
-        const request = {
-          location: new google.maps.LatLng(lat, lng),
-          radius: 1000,
-          keyword: keyword.value,
-        };
+    const request = {
+      location: new google.maps.LatLng(lat, lng),
+      radius: 1000,
+      keyword: keyword.value,
+    };
   
-        service.nearbySearch(request, (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK) {
-            places.value = results.map((place) => ({
-              ...place,
-              distance: calculateDistance(
-                lat,
-                lng,
-                place.geometry.location.lat(),
-                place.geometry.location.lng()
-              ),
-              photo:
-                place.photos && place.photos[0]
-                  ? place.photos[0].getUrl({ maxWidth: 400 })
-                  : null,
-            }));
-  
-            localStorageUtil.set("places", places.value);
-            localStorageUtil.set("sortOrder", sortOrder.value);
-            localStorageUtil.set("districts", userLocation.value);
-            localStorageUtil.set("districts", { lat, lng });
-          } else {
-            console.error("搜尋失敗，狀態：", status);
-          }
+    service.nearbySearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        places.value = results.map((place) => ({
+          ...place,
+          distance: calculateDistance(
+            lat,
+            lng,
+            place.geometry.location.lat(),
+            place.geometry.location.lng()
+          ),
+          photo:
+            place.photos && place.photos[0]
+              ? place.photos[0].getUrl({ maxWidth: 400 })
+              : null,
+        }));
+
+        updateLocalStorage(places.value, sortOrder.value, { lat, lng});
+      } else {
+        console.error("搜尋失敗，狀態：", status);
+      }
   
           searched.value = true;
         });
-      };
-  
-      watch(selectedDistrict, (newDistrict) => {
-        if (newDistrict === "我的位置") {
-          locateUser();
+      }, 2000);
+
+    // 監聽 URL 的 keyword 變化
+    watch(
+    () => route.query.keyword,
+    (newKeyword) => {
+       if (newKeyword !== keyword.value) {
+          keyword.value = newKeyword || "";
         }
-      });
+     }
+    );
 
-      const handleEnterKey = async (event) => {
-        event.preventDefault(); // 防止預設行為（表單提交）
 
-        if (!keyword.value.trim()) {
-          alert("請輸入有效的關鍵字！");
-          return;
-        }
+   const handleEnterKey = async () => {
+      if (!keyword.value.trim()) {
+        alert("請輸入有效的關鍵字！");
+        return;
+      }
 
-        if (isLoading.value) {
-          // 防止重複執行
-          return;
-        }
+      debouncedUpdateQuery(keyword.value);
+      await debouncedSearchPlaces(); 
+    };
 
-        isLoading.value = true; // 開始搜尋
-        await searchPlaces();
-        isLoading.value = false; // 搜尋結束
-      };
-  
-      return {
-        keyword,
-        selectedDistrict,
-        sortOrder,
-        searched,
-        places,
-        districts,
-        sortedPlaces,
-        userLocation,
-        isLocating,
-        locateUser,
-        searchPlaces,
-        handleEnterKey,
+    const debouncedUpdateQuery = debounce(updateQuery, 1000);
+
+    // 監聽 keyword 變化
+    watch(keyword, (newKeyword) => {
+      debouncedUpdateQuery(newKeyword); 
+    });
+
+    watch(selectedDistrict, (newDistrict) => {
+      if (newDistrict === "我的位置") {
+        locateUser();
+      }
+    });
+
+
+    return {
+      keyword,
+      selectedDistrict,
+      sortOrder,
+      searched,
+      places,
+      districts,
+      sortedPlaces,
+      userLocation,
+      isLocating,
+      locateUser,
+      debouncedSearchPlaces,
+      handleEnterKey
       };
     },
   };
-  </script>
+</script>
+
 
 <template>
-  <form class="items-center hidden px-4 space-x-2 bg-white border rounded-full shadow-sm md:flex border-amber-400 h-11 ml-52 " >
-    <input
+  <!-- 統一的搜尋框 -->
+  <form
+    class="flex items-center px-4 space-x-2 bg-white border rounded-full  shadow-sm border-amber-500 h-11 md:space-x-4"
+    @submit.prevent="handleEnterKey">
+    <!-- 輸入框 -->
+     <div>
+      <input
       type="text"
       v-model="keyword"
       id="keyword"
-      @keypress.enter.prevent="searchPlaces"
       placeholder="美食分類、餐廳"
-      class="flex-1 py-2 outline-none text-amber-500 placeholder-amber-300"
+      class="w-40 md:w-full text-amber-500 placeholder-amber-300 px-2 py-1 outline-none"
     />
-      <!-- 餐具圖標 -->
-      <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500" />
-      <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
+     </div>
+    
+    <!-- 桌面版餐廳圖示 -->
+    <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500 md:block hidden" />
+    
+    <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
 
-      <!-- 城市選擇按鈕 -->
-    <div class="flex items-center space-x-1 border-[1.5px]  border-amber-100 text-amber-500 rounded-full px-3 py-1">
-      <select class="outline-none" v-model="selectedDistrict" id="district">
-          <option class="bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
-            {{ district }}
-          </option>
-        </select>
+    <!-- 地區選擇框 (桌面版) -->
+    <div class="hidden md:flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
+      <select 
+      class="outline-none" 
+      v-model="selectedDistrict" 
+      id="district"
+      >
+        <option class="bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
+          {{ district }}
+        </option>
+      </select>
     </div>
-    <!-- 地點圖標 -->
-    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500" />
-    <!-- 搜索按鈕 -->
-    <div class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none ml-52" @click="searchPlaces"
-    >
-        <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
-  </div>
-    </form>
+    
+    <!-- 地圖圖示 -->
+    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500 md:block hidden" />
+    
+    <!-- 搜尋按鈕 -->
+    <button
+      class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none ml-52 cursor-pointer">
+      <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
+    </button>
+  </form>
 </template>

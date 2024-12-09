@@ -1,5 +1,5 @@
 <template>
-  <div class="box-border w-1/2 md:w-1/2 pt-2 h-screen overflow-y-auto">
+  <div class="box-border w-full md:w-1/2 pt-2 h-screen overflow-y-auto">
     <div class="flex top-16 flex-col bg-white box-border w-full space-x-0 md:top-6 z-50">
       <div class="flex flex-col">
         <div class="p-3 font-bold text-gray-500">
@@ -123,6 +123,22 @@
           </span>
           <p> {{ place.opening_hours?.open_now ? '營業中' : '已打烊' }}</p>
         </div>
+        <div class="mt-3 ml-3 flex flex-wrap items-center">
+        <span>
+          <a href="#" 
+            class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
+            <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" class="text-orange-400"/>
+                相似餐廳
+          </a>
+        </span>
+        <span>
+          <a href="#" 
+            class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
+            <font-awesome-icon :icon="['fas', 'location-dot']" class="text-orange-400"/>
+                附近                 
+          </a>
+        </span>
+      </div>  
       </div>
     </div>
   </div>
