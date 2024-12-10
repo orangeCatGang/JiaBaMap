@@ -52,6 +52,7 @@
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
       });
+
       //排序
       const sortedPlaces = computed(() => {
         if (sortOrder.value === "distance") {
@@ -129,7 +130,7 @@
       }
       lat = userLocation.value.lat;
       lng = userLocation.value.lng;
-    } else {
+        } else {
       // 對於其他行政區，直接從 districts 中獲取座標
       const district = districts[selectedDistrict.value];
       if (!district) {
@@ -173,18 +174,9 @@
   
           searched.value = true;
         });
-      }, 2000);
+      }, 1000);
 
-    // 監聽 URL 的 keyword 變化
-    watch(
-    () => route.query.keyword,
-    (newKeyword) => {
-       if (newKeyword !== keyword.value) {
-          keyword.value = newKeyword || "";
-        }
-     }
-    );
-
+    // enter 按鈕事件
    const handleEnterKey = async () => {
       if (!keyword.value.replace(/\s+/g, "")) {
         alert("請輸入有效的關鍵字！");
@@ -197,10 +189,6 @@
 
     const debouncedUpdateQuery = debounce(updateQuery, 1000);
 
-    // 監聽 keyword 變化
-    watch(keyword, (newKeyword) => {
-      debouncedUpdateQuery(newKeyword); 
-    });
 
     watch(selectedDistrict, (newDistrict) => {
       if (newDistrict === "我的位置") {
@@ -208,6 +196,27 @@
       }
     });
 
+      // 監聽 URL 的 keyword 變化
+      watch(
+    () => route.query.keyword,
+    (newKeyword) => {
+       if (newKeyword !== keyword.value) {
+          keyword.value = newKeyword || "";
+        }
+     }
+    );
+
+     // 監聽 keyword 的變化
+     watch(
+        () => route.query.keyword,
+        (newKeyword) => {
+          if (newKeyword !== keyword.value) {
+            keyword.value = newKeyword;
+            debouncedSearchPlaces(); 
+          }
+        },
+        { immediate: true } // 組件掛載時立即執行一次
+      );
 
     return {
       keyword,

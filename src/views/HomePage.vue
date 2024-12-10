@@ -184,7 +184,7 @@ export default {
   <div>
     <header>
       <!-- 頁頭（導航欄） -->
-      <div class="flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 bg-transparent md:space-y-0">
+      <div class="flex flex-wrap items-center justify-between p-2 space-y-2 bg-transparent md:space-y-0">
         <!-- LOGO -->
         <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 主選單 -->
