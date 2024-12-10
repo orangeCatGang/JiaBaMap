@@ -93,7 +93,7 @@
       v-for="place in sortedPlaces" 
       :key="place.place_id"
       :data-place-id="place.place_id"
-      class="flex mt-2 items-center pb-2 border-b transition-colors duration-200"
+      class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
       :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.place_id }"
       @mouseenter="handleMouseEnter(place.place_id)"
       @mouseleave="handleMouseLeave">
