@@ -236,9 +236,9 @@ document.addEventListener('click', handleDocumentClick);
                     </a>
                     <!-- 評價部分 -->
                     <a :href="googleMapsUri" target="_blank" class="cursor-pointer hover:opacity-90">
-                        <div class="mt-2 w-40">
-                            <div class="flex items-center mb-1 py-1 rounded bg-amber-500 justify-center ">
-                                <font-awesome-icon :icon="['fab', 'google']" class="text-blue-600 w-4 h-4 mr-1"/>
+                        <div class="w-40 mt-2">
+                            <div class="flex items-center justify-center py-1 mb-1 rounded bg-amber-500 ">
+                                <font-awesome-icon :icon="['fab', 'google']" class="w-4 h-4 mr-1 text-blue-600"/>
                                 <div class="flex items-center">
                                     <span class="text-sm">評價:</span>
                                     <span class="text-sm text-gray-500">{{ userRatingCount }}+</span>
@@ -291,22 +291,22 @@ document.addEventListener('click', handleDocumentClick);
                     <h3 class="mb-2 text-2xl font-bold">{{ storeName }} 的相似餐廳</h3>
                     <div v-if="displayRestaurants && displayRestaurants.length" class="flex items-center justify-center space-x-4">
                         <!-- 左側切換按鈕 -->
-                        <button @click="handlePrevGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
+                        <button @click="handlePrevGroup" class="p-2 bg-gray-200 rounded-full hover:bg-gray-300">
                             ←
                         </button>
 
                         <!-- 餐廳展示區 -->
                         <div class="relative w-full overflow-hidden">
                             <transition-group name="slide" tag="div" class="flex">
-                                <div v-for="(restaurant, index) in displayRestaurants" :key="restaurant.uniqueId || index" class="flex-shrink-0 w-1/2 md:w-1/3 px-2">
+                                <div v-for="(restaurant, index) in displayRestaurants" :key="restaurant.uniqueId || index" class="flex-shrink-0 w-1/2 px-2 md:w-1/3">
                                     <div class="bg-white rounded-lg shadow-md mb-4 max-w-[250px] mx-auto">
                                         <div class="h-40 overflow-hidden">
-                                            <img v-if="restaurant?.photoUrl" :src="restaurant.photoUrl" :alt="restaurant.name" class="w-full h-40 object-cover rounded-t-lg" />
+                                            <img v-if="restaurant?.photoUrl" :src="restaurant.photoUrl" :alt="restaurant.name" class="object-cover w-full h-40 rounded-t-lg" />
                                         </div>
                                         <div class="p-4">
-                                            <h4 class="font-bold text-lg truncate max-md:text-center">{{ restaurant?.name }}</h4>
-                                            <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
-                                                <p class="text-white bg-amber-500 px-2 rounded-full w-fit text-center">
+                                            <h4 class="text-lg font-bold truncate max-md:text-center">{{ restaurant?.name }}</h4>
+                                            <div class="flex flex-col items-center justify-between gap-2 mt-2 md:flex-row">
+                                                <p class="px-2 text-center text-white rounded-full bg-amber-500 w-fit">
                                                     評分: {{ restaurant?.rating }}★
                                                 </p>
                                                 <p class="text-sm text-gray-400">
@@ -320,13 +320,13 @@ document.addEventListener('click', handleDocumentClick);
                         </div>
 
                         <!-- 右側切換按鈕 -->
-                        <button @click="handleNextGroup" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
+                        <button @click="handleNextGroup" class="p-2 bg-gray-200 rounded-full hover:bg-gray-300">
                             →
                         </button>
                     </div>
 
                     <!-- 如果沒有數據顯示加載狀態 -->
-                    <div v-else class="text-center py-4">
+                    <div v-else class="py-4 text-center">
                         正在加載餐廳資料...
                     </div>
 
@@ -346,7 +346,7 @@ document.addEventListener('click', handleDocumentClick);
                     <!-- 左側切換按鈕 -->
                     <button 
                     @click="handlePrevRecommendedGroup"
-                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    class="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
                     >
                     ←
                     </button>
@@ -368,15 +368,15 @@ document.addEventListener('click', handleDocumentClick);
                                 v-if="restaurant?.photoUrl" 
                                 :src="restaurant.photoUrl" 
                                 :alt="restaurant.name" 
-                                class="w-full h-40 object-cover rounded-t-lg"
+                                class="object-cover w-full h-40 rounded-t-lg"
                                 />
                             </div>
                             <div class="p-4">
-                                <h4 class="font-bold text-lg truncate max-md:text-center">
+                                <h4 class="text-lg font-bold truncate max-md:text-center">
                                 {{ restaurant?.name }}
                                 </h4>
-                                <div class="flex flex-col md:flex-row justify-between items-center mt-2 gap-2">
-                                <p class="text-white bg-amber-500 px-2 rounded-full w-fit text-center">
+                                <div class="flex flex-col items-center justify-between gap-2 mt-2 md:flex-row">
+                                <p class="px-2 text-center text-white rounded-full bg-amber-500 w-fit">
                                     評分: {{ restaurant?.rating }}★
                                 </p>
                                 <p class="text-sm text-gray-400">
@@ -392,14 +392,14 @@ document.addEventListener('click', handleDocumentClick);
                     <!-- 右側切換按鈕 -->
                     <button 
                     @click="handleNextRecommendedGroup"  
-                    class="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                    class="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
                     >
                     →
                     </button>
                 </div>
 
                     <!-- 加載狀態 -->
-                    <div v-else class="text-center py-4">
+                    <div v-else class="py-4 text-center">
                     正在加載餐廳資料...
                     </div>
 

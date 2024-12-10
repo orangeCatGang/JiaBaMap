@@ -3,9 +3,9 @@
         <!-- 用隱藏的 input type=file 來觸發檔案選擇器 -->
         <input type="file" ref="fileInput" @change="handleFileChange" hidden>
         <!-- 圖片預覽 -->
-        <div v-if="imageUrls" class="flex gap-4">
-            <div v-for="(imageUrl, index) in imageUrls" :key="index" class="relative overflow-hidden w-52 h-52">
-                <div @click="deleteImg" class="absolute text-lg font-bold leading-7 text-center text-white bg-red-500 rounded-full cursor-pointer w-7 h-7 top-2 right-2 ">X</div>
+        <div v-if="pictures.length" class="flex gap-4">
+            <div v-for="(imageUrl, index) in pictures" :key="index" class="relative overflow-hidden w-52 h-52">
+                <div @click="deleteImg(index)" class="absolute text-lg font-bold leading-7 text-center text-white bg-red-500 rounded-full cursor-pointer w-7 h-7 top-2 right-2 ">X</div>
                 <img :src="imageUrl" class="w-full my-2">
             </div>
         </div>
@@ -20,42 +20,33 @@
     </div>
 </template>
 <script setup>
-import { computed, ref, watch } from  'vue'
+import { computed, ref } from  'vue'
+import { usePicStore } from '../../stores/picStore'
+
 const fileInput = ref(null)
-const imageUrls = ref([])
-const maxImages = 2
-let isDisabled = computed(() => imageUrls.value.length >= maxImages)
+const picStore = usePicStore()
+
+const pictures = computed(() => picStore.pictures)
+const isDisabled = picStore.isDisabled
+
+console.log(isDisabled)
 
 const triggerFileInput = () => {
     fileInput.value.click()
 }
 
-const props = defineProps({
-    resetPics: Boolean
-})
-
-watch(() => props.resetStatus, (newValue) => {
-    if (newValue) {
-        imageUrls.value = [] // 清空本地圖片
-    }
-})
-
-const deleteImg = () => {
-    imageUrls.value.pop()
+const deleteImg = (index) => {
+    picStore.removePic(index)
 }
-
-const emit = defineEmits(['pics-update'])
 
 const handleFileChange = (e) => {
     const file = e.target.files[0]
     if(file){
         const reader = new FileReader()
         reader.onload = (event) => {
-            imageUrls.value.push(event.target.result)
-            emit('pics-update', imageUrls.value)
+            picStore.addPic(event.target.result)
         }
         reader.readAsDataURL(file)
     }
 }
-
 </script>

@@ -1,6 +1,6 @@
 <template>
-    <div class="flex flex-col gap-x-5" v-if="comments.length > 0">
-        <div class="flex gap-x-5 gap-y-6" v-for="(comment, index) in comments" :key="index">
+    <div class="flex flex-col my-4 gap-y-5" v-if="comments.length > 0">
+        <div class="flex gap-x-6 gap-y-6" v-for="(comment, index) in comments" :key="index">
             <div class="w-12 h-12 overflow-hidden rounded-full bg-slate-300">
                 <img :src="comment.avatar ? comment.avatar : '/src/assets/default_user.png'" alt="avatar" class="object-cover w-full h-full">
             </div>
@@ -27,20 +27,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue';
+import { useCommentStore } from '../../stores/commentStore';
 
-// 讚數
-let likeNum = ref(0)
-let likeHint = ref('表示讚賞')
-let likeStatus = ref(false)
-
-const props = defineProps({
-    comments: {
-        type: Array,
-        default: () => [],
-    }
-})
-console.log("Received comments:", props.comments)
+const commentStore = useCommentStore();
+const comments = computed(() => commentStore.comments); // 從 Store 獲取評論數據
 
 
 // 讚數+1
