@@ -4,6 +4,9 @@ import UserProfile from '../views/UserProfile.vue'
 import StorePage from '../views/StorePage.vue'
 import SearchPage from '../views/SearchPage.vue'
 import Login from '../components/Login.vue'
+import MyArticle from '../views/MyArticle.vue'
+import ArticleList from '../views/ArticleList.vue'
+
 const routes = [
   {
     path: '/',
@@ -31,7 +34,16 @@ const routes = [
     name: 'login',
     component: Login,
   },
-
+  {
+    path: '/MyArticle',
+    name: 'MyArticle',
+    component: MyArticle,
+  },
+  {
+    path: '/ArticleList',
+    name: 'ArticleList',
+    component: ArticleList,
+  },
 ]
 
 const router = createRouter({

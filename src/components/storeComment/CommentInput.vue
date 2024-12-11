@@ -91,6 +91,8 @@ input[type=number]::-webkit-inner-spin-button {
 }
 /* Firefox */
 input[type=number] {
-  -moz-appearance: textfield;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 </style>
