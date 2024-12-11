@@ -188,7 +188,7 @@ export default {
         <!-- LOGO -->
         <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 主選單 -->
-          <div class="items-center space-x-4 md:flex main-menu">
+          <div class="items-center md:flex main-menu">
             <button  class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
             <Login :visible="showLoginModal" @close="closeLoginModal" />
             <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
