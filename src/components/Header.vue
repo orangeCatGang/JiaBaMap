@@ -125,7 +125,7 @@
           <div ref="menuContainer" class="md:hidden">
             <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
             <div class="flex items-center space-x-4 md:hidden hamburger-menu">
-                
+                <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5 text-amber-500" /></a>
                 <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
                 <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
                 </button>
