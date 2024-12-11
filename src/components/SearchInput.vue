@@ -2,8 +2,7 @@
   import { ref, reactive, computed, watch } from "vue";
   import loader from "../components/googleMapsLoader.js";
   import { useRouter, useRoute } from "vue-router";
-  import debounce from 'lodash/debounce';
-  import { useKeywordStore } from "@/stores/keywordStore";
+  import debounce from 'lodash/debounce';  
   
   // Local Storage 工具方法
   const localStorageUtil = {
@@ -35,7 +34,6 @@
       const places = ref([]);
       const userLocation = ref(null);
       const isLocating = ref(false);
-      const keywordStore = useKeywordStore();
       //搜尋範圍
       const districts = reactive({
         "我的位置": null,
@@ -116,11 +114,6 @@
         places.value = [];
         searched.value = false;
   
-        if (!keyword.value.replace(/\s+/g, "")) {
-          alert("請輸入有效的關鍵字！");
-          return;
-        }
-  
         let lat, lng;
         if (selectedDistrict.value === "我的位置") {
       // 只有選擇「我的位置」時檢查 userLocation
@@ -174,11 +167,11 @@
   
           searched.value = true;
         });
-      }, 1000);
+      }, 800);
 
     // enter 按鈕事件
    const handleEnterKey = async () => {
-      if (!keyword.value.replace(/\s+/g, "")) {
+      if (!keyword.value || keyword.value == "") {
         alert("請輸入有效的關鍵字！");
         return;
       }
@@ -202,22 +195,17 @@
     (newKeyword) => {
        if (newKeyword !== keyword.value) {
           keyword.value = newKeyword || "";
+          debouncedSearchPlaces();
         }
-     }
+     },
+    { immediate: true }
     );
 
-     // 監聽 keyword 的變化
-     watch(
-        () => route.query.keyword,
-        (newKeyword) => {
-          if (newKeyword !== keyword.value) {
-            keyword.value = newKeyword;
-            debouncedSearchPlaces(); 
-          }
-        },
-        { immediate: true } // 組件掛載時立即執行一次
-      );
 
+  
+   
+  
+    
     return {
       keyword,
       selectedDistrict,

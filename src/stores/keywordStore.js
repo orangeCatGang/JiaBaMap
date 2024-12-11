@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 export const useKeywordStore = defineStore('keyword', {
   state: () => ({
-    keyword: ''
+    keyword: "",
   }),
   actions: {
     navigateToSearch(router, tag) {

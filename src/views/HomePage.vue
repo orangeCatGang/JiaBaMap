@@ -189,13 +189,13 @@ export default {
         <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 主選單 -->
           <div class="items-center md:flex main-menu">
-            <button  class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
+            <button  class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
             <Login :visible="showLoginModal" @close="closeLoginModal" />
-            <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
-            <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
+            <a href="#" class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
+            <a href="#" class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
             <!-- 店家專區的下拉選單 -->
             <div class="relative inline-block text-left group">
-                <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
+                <button class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
                     店家專區
                     <span>&#x25BC;</span>
                 </button>
@@ -292,7 +292,7 @@ export default {
           <h1 class="z-10 px-3 mt-8 text-3xl text-white md:text-5xl text-bold">想知道哪裡有美食？</h1>
           <h2 class="z-10 px-3 mt-5 text-lg text-white md:text-xl text-bold">從超過 50,000 家精選餐廳中，探索您不知道的熱門美食。</h2>
           <!-- 搜尋欄容器 -->
-          <div class="z-10 hidden md:flex items-center mt-10 bg-white border rounded-full h-11 ">
+          <div class="z-10 hidden md:flex items-center mt-10 bg-white rounded-full h-11 ">
              <SearchInput />
           </div>
       </div>
