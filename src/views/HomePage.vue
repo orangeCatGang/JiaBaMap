@@ -209,7 +209,7 @@ export default {
                 </div>
                 <!-- 排行榜的下拉選單 -->
                 <div class="relative inline-block text-left group">
-                  <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
+                  <button class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">
                       排行榜
                       <span>&#x25BC;</span>
                   </button>
