@@ -1,3 +1,79 @@
+<script setup>
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useKeywordStore } from "@/stores/keywordStore";
+
+const restaurants = ref([
+  {
+    rank: 1,
+    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
+    rating: 4.9,
+    reviews: 20,
+    cost: 600,
+    openingHours: "12:00-14:30, 16:00-22:00",
+    keyword: "晚餐",
+    imageUrl: "/image/麻的小辛辣.jpg"
+  },
+  {
+    rank: 2,
+    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
+    rating: 4.8,
+    reviews: 10,
+    cost: 500,
+    openingHours: "12:00-14:30, 16:00-22:00",
+    keyword: "咖啡",
+    imageUrl: "/image/麻的小辛辣.jpg"
+  },
+  {
+    rank: 3,
+    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
+    rating: 4.7,
+    reviews: 20,
+    cost: 400,
+    openingHours: "12:00-14:30, 16:00-22:00",
+    keyword: "燒肉",
+    imageUrl: "/image/麻的小辛辣.jpg"
+  },
+  {
+    rank: 4,
+    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
+    rating: 4.7,
+    reviews: 20,
+    cost: 600,
+    openingHours: "12:00-14:30, 16:00-22:00",
+    keyword: "pizza",
+    imageUrl: "/image/麻的小辛辣.jpg"
+  },
+  {
+    rank: 5,
+    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
+    rating: 4.7,
+    reviews: 20,
+    cost: 700,
+    openingHours: "12:00-14:30, 16:00-22:00",
+    keyword: "中餐",
+    imageUrl: "/image/麻的小辛辣.jpg"
+  }
+]);
+
+const getRankImage = computed(() => {
+  return (rank) => {
+    if (rank <= 3) {
+      return `/image/top${rank}.png`;
+    }
+    return null;
+  };
+});
+
+const router = useRouter()
+const keywordStore = useKeywordStore()
+
+const navigateToSearch = (tag) => {
+  keywordStore.navigateToSearch(router, tag)
+}
+
+</script>
+
 <template>
   <div class="box-border w-full pt-2 h-screen overflow-y-auto mt-2 sm:w-72">
     <div>
@@ -50,8 +126,9 @@
           <div class="bg-gray-200 rounded-full px-2 text-base mx-1 sm:text-xs ">
             <a href="#"
               class="text-xs"
+              @click="navigateToSearch(item.keyword)"
             >
-            {{ item.tags }}
+            {{ item.keyword }}
             </a>
           </div>
           <div>
@@ -62,75 +139,3 @@
     </div>
   </div>
 </template>
-
-
-<script setup>
-import { computed, ref } from "vue";
-
-const restaurants = ref([
-  {
-    rank: 1,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.9,
-    reviews: 20,
-    cost: 600,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: "新開幕",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 2,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.8,
-    reviews: 10,
-    cost: 500,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: "午餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 3,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 400,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: "午餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 4,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 600,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: "午餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  },
-  {
-    rank: 5,
-    name: "麻的 小辛辣｜麻辣干鍋 台中美村店",
-    rating: 4.7,
-    reviews: 20,
-    cost: 700,
-    openingHours: "12:00-14:30, 16:00-22:00",
-    tags: "午餐",
-    imageUrl: "/image/麻的小辛辣.jpg"
-  }
-]);
-
-const getRankImage = computed(() => {
-  return (rank) => {
-    if(rank === 1) {
-      return "/image/top1.png"
-    } else if (rank === 2) {
-      return "/image/top2.png"
-    } else if (rank === 3) {
-      return "/image/top3.png"
-    } 
-    return null;
-  }
-})
-
-</script>
