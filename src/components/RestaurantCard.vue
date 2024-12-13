@@ -28,12 +28,12 @@
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
-            <span>{{ sortOptions[sortOrder] }}</span>
+            <!-- <span>{{ sortOptions[sortOrder] }}</span> -->
             <div>
               <font-awesome-icon :icon="['fas', 'chevron-down']" />
             </div>
           </button>
-          <div
+          <!-- <div
             v-if="sortMenu"
             class="bg-amber-400 rounded-md text-white text-xs w-full p-1 text-center absolute top-full left-0 mt-1 shadow-md z-10">
             <ul>
@@ -45,7 +45,7 @@
                 <span>{{ label }}</span>
               </li>
             </ul>
-          </div>
+          </div> -->
         </div>
 
         <!-- 價位分類 -->
@@ -56,7 +56,7 @@
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
-            <span>{{ costOptions[costOrder] }}</span>
+            <!-- <span>{{ costOptions[costOrder] }}</span> -->
             <div>
               <font-awesome-icon :icon="['fas', 'chevron-down']" />
             </div>
@@ -69,7 +69,7 @@
                 v-for="(label, value) in costOptions"
                 :key="value"
                 class="cursor-pointer hover:bg-amber-500 py-1 ">
-                <span>{{ label }}</span>
+                <!-- <span>{{ label }}</span> -->
               </li>
             </ul>
           </div>
@@ -89,39 +89,39 @@
       </div>
     </div>
 
+    <!-- :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.id }" -->
       <div 
-      v-for="place in sortedPlaces" 
+      v-for="place in result" 
       :key="place.place_id"
       :data-place-id="place.place_id"
       class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
-      :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.place_id }"
       @mouseenter="handleMouseEnter(place.place_id)"
       @mouseleave="handleMouseLeave">
       <div class="w-40 h-32 ml-3">
-        <img v-if="place.photo" :src="place.photo" alt="Place image" class="object-cover w-full h-full" />
+        <img v-if="place.photoId" :src="photoGet(place.photoId)" alt="Place image" class="object-cover w-full h-full" />
       </div>
       <div class="flex flex-col justify-between ml-3 sm:text-xl w-4/5">
         <div class="ml-3">
           <h2 class="font-bold text-gray-500 text-base">
-            <a href="#" class="text-amber-500 hover:text-orange-300">{{ place.name }}</a>
+            <a href="#" class="text-amber-500 hover:text-orange-300">{{ place.name.text }}</a>
           </h2>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
           <div class="bg-red-600 mr-2 rounded-2xl text-white px-2 items-center">
             <p>{{ place.rating }} <font-awesome-icon :icon="['fas', 'star']" /></p>
           </div>
-          <p class="mr-2 font-light">(評論數: {{ place.user_ratings_total }})</p>
+          <p class="mr-2 font-light">(評論數: {{ place.userRatingCount }})</p>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
-          <p class="mr-2 font-light">距離 {{ place.distance.toFixed(2) }} 公里</p>
+          <!-- <p class="mr-2 font-light">距離 {{ place.distance.toFixed(2) }} 公里</p> -->
         </div>
         <div class="mt-3 mx-3 hidden md:flex items-center text-sm">
           <span>
             <font-awesome-icon 
               :icon="['fas' ,'circle']" 
-              :style="{color:place.opening_hours?.open_now ? 'green' : 'gray', fontSize:'8px', margin:'2px'}" />
+              :style="{color:place?.openNow ? 'green' : 'gray', fontSize:'8px', margin:'2px'}" />
           </span>
-          <p> {{ place.opening_hours?.open_now ? '營業中' : '已打烊' }}</p>
+          <p> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
         </div>
         <div class="mt-3 ml-3 flex flex-wrap items-center">
         <span>
@@ -145,83 +145,96 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRestaurantStore } from '@/stores/searchPage';
+// import { ref, computed, onMounted, onUnmounted } from 'vue';
+// import { useRestaurantStore } from '@/stores/searchPage';
 
-const restaurantStore = useRestaurantStore()
-const places = ref([]);
-const sortOrder = ref("default");
-const costOrder = ref("default");
-const sortMenu = ref(false);
-const costMenu = ref(false);
+// const restaurantStore = useRestaurantStore()
+// const places = ref([]);
+// const sortOrder = ref("default");
+// const costOrder = ref("default");
+// const sortMenu = ref(false);
+// const costMenu = ref(false);
 
-const sortOptions = {
-  default: "預設",
-  distance: "最近距離",
-  rating: "最高評分",
-  reviews: "最高人氣"
-};
+// const sortOptions = {
+//   default: "預設",
+//   distance: "最近距離",
+//   rating: "最高評分",
+//   reviews: "最高人氣"
+// };
 
-const costOptions = {
-  default: "不選擇",
-  cost1: "150以內",
-  cost2: "150~600",
-  cost3: "600~1200",
-  cost4: "1200以上"
-};
+// const costOptions = {
+//   default: "不選擇",
+//   cost1: "150以內",
+//   cost2: "150~600",
+//   cost3: "600~1200",
+//   cost4: "1200以上"
+// };
 
-const sortedPlaces = computed(() => {
-  if (sortOrder.value === "distance") {
-    return [...places.value].sort((a, b) => (a.distance || 0) - (b.distance || 0));
-  } else if (sortOrder.value === "rating") {
-    return [...places.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  } else if (sortOrder.value === "reviews") {
-    return [...places.value].sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0));
-  } else {
-    return places.value;
-  }
-});
+// const sortedPlaces = computed(() => {
+//   if (sortOrder.value === "distance") {
+//     return [...places.value].sort((a, b) => (a.distance || 0) - (b.distance || 0));
+//   } else if (sortOrder.value === "rating") {
+//     return [...places.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+//   } else if (sortOrder.value === "reviews") {
+//     return [...places.value].sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0));
+//   } else {
+//     return places.value;
+//   }
+// });
 
-const fetchDataFromLocalStorage = () => {
-  const localStorageUtil = {
-    get(key) {
-      const value = localStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
-    },
-  };
+// const fetchDataFromLocalStorage = () => {
+//   const localStorageUtil = {
+//     get(key) {
+//       const value = localStorage.getItem(key);
+//       return value ? JSON.parse(value) : null;
+//     },
+//   };
 
-  places.value = localStorageUtil.get("places") || [];
-  sortOrder.value = localStorageUtil.get("sortOrder") || "default";
-};
+//   places.value = localStorageUtil.get("places") || [];
+//   sortOrder.value = localStorageUtil.get("sortOrder") || "default";
+// };
 
-const updateSortOrder = (value) => {
-  sortOrder.value = value;
-  localStorage.setItem("sortOrder", JSON.stringify(value));
-  sortMenu.value = false;
-};
+// const updateSortOrder = (value) => {
+//   sortOrder.value = value;
+//   localStorage.setItem("sortOrder", JSON.stringify(value));
+//   sortMenu.value = false;
+// };
 
-const toggleSort = () => {
-  sortMenu.value = !sortMenu.value;
-};
+// const toggleSort = () => {
+//   sortMenu.value = !sortMenu.value;
+// };
 
-const toggleCost = () => {
-  costMenu.value = !costMenu.value;
-};
+// const toggleCost = () => {
+//   costMenu.value = !costMenu.value;
+// };
 
-const handleMouseEnter = (placeId) => {
-  restaurantStore.setHoveredPlace(placeId)
-}
+// const handleMouseEnter = (placeId) => {
+//   restaurantStore.setHoveredPlace(placeId)
+// }
 
-const handleMouseLeave = () => {
-  restaurantStore.setHoveredPlace(null)
-}
+// const handleMouseLeave = () => {
+//   restaurantStore.setHoveredPlace(null)
+// }
 
-onMounted(() => {
-  fetchDataFromLocalStorage();
-  window.addEventListener("places-updated", fetchDataFromLocalStorage);
-});
+// onMounted(() => {
+//   fetchDataFromLocalStorage();
+//   window.addEventListener("places-updated", fetchDataFromLocalStorage);
+// });
 
-onUnmounted(() => {
-  window.removeEventListener("places-updated", fetchDataFromLocalStorage);
-});
+// onUnmounted(() => {
+//   window.removeEventListener("places-updated", fetchDataFromLocalStorage);
+// });
+
+import { useKeywordStore } from '../stores/keywordStore.js'
+import { computed } from 'vue'
+
+const Search = useKeywordStore()
+const result = computed(() => Search.result)
+
+const photoGet = (photoId) =>{
+  return `http://localhost:3000/restaurants/photo?id=${photoId}`
+} 
+  
+
+
 </script>
