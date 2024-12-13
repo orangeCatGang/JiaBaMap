@@ -4,7 +4,7 @@
         <!-- <FilterBar /> -->
         <div class="flex">
             <RestaurantCard />
-            <!-- <MapComponent/> -->
+            <MapComponent/>
         </div>
     </div>
 </template>

@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRestaurantStore } from '@/stores/searchPage';
 import { watch } from 'vue'
 import loader from "./googleMapsLoader";
@@ -14,8 +14,8 @@ import loader from "./googleMapsLoader";
     let markers = []; // 使用普通數組管理標記
     let infoWindows = []; // 管理所有 InfoWindow
     const mapContainer = ref(null); // 地圖 DOM 容器
-    const places = ref([]); // 從 Local Storage 加載的地點資料
-    const districts = ref([]);
+    // const places = ref([]); // 從 Local Storage 加載的地點資料
+    // const districts = ref([]);
 
 
     watch(() => store.hoveredPlaceId, (newPlaceId) => {
@@ -44,20 +44,20 @@ import loader from "./googleMapsLoader";
 
 
     // 從 Local Storage 加載地點資料
-    const fetchPlacesFromLocalStorage = () => {
-      const localStorageUtil = {
-        get(key) {
-          const value = localStorage.getItem(key);
-          return value ? JSON.parse(value) : [];
-        },
-      };
-      places.value = localStorageUtil.get("places") || []; // 更新地點資料
-      districts.value = localStorageUtil.get("districts") || [];
-      if (map.value && districts.value) {
-        map.value.setCenter(districts.value); // 動態設置地圖的中心點
-      }
-      updateMarkers(); // 每次加載新資料時更新標記
-    };
+    // const fetchPlacesFromLocalStorage = () => {
+    //   const localStorageUtil = {
+    //     get(key) {
+    //       const value = localStorage.getItem(key);
+    //       return value ? JSON.parse(value) : [];
+    //     },
+    //   };
+    //   places.value = localStorageUtil.get("places") || []; // 更新地點資料
+    //   districts.value = localStorageUtil.get("districts") || [];
+    //   if (map.value && districts.value) {
+    //     map.value.setCenter(districts.value); // 動態設置地圖的中心點
+    //   }
+    //   updateMarkers(); // 每次加載新資料時更新標記
+    // };
     
 
     // 初始化 Google 地圖
@@ -96,24 +96,27 @@ import loader from "./googleMapsLoader";
       clearMarkers()
       places.value.forEach((place) => {
         const marker = new google.maps.Marker({
-          position: place.geometry.location,
+          position: {
+            lat: place.location.latitude,
+            lng: place.location.longitude
+          },
           map: map.value,
-          title: place.name,
-          placeId: place.place_id  // 保存 placeId 以便後續查找
+          title: place.name.text,
+          placeId: place.id  // 保存 placeId 以便後續查找
     });
-
+    
       // 添加滑鼠事件
       marker.addListener('mouseover', () => {
-      store.setHoveredPlace(place.place_id);
+      store.setHoveredPlace(place.id);
       google.maps.event.trigger(marker, 'click'); // 觸發 InfoWindow
       });
 
       marker.addListener('mouseover', () => {
-      store.setHoveredPlace(place.place_id);
+      store.setHoveredPlace(place.id);
       google.maps.event.trigger(marker, 'click');
       
       // 新增這段：滾動到對應的餐廳卡片
-      const element = document.querySelector(`[data-place-id="${place.place_id}"]`);
+      const element = document.querySelector(`[data-place-id="${place.id}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       };
@@ -123,10 +126,10 @@ import loader from "./googleMapsLoader";
 
         // 使用 PlacesService 取得地點的詳細資料
         const service = new google.maps.places.PlacesService(map.value);
-        service.getDetails({ placeId: place.place_id }, (placeDetails, status) => {
+        service.getDetails({ placeId: place.id }, (placeDetails, status) => {
           if (status === google.maps.places.PlacesServiceStatus.OK) {
-            const isOpen = placeDetails.opening_hours?.isOpen(new Date()); // 使用 isOpen() 檢查是否營業
-            const openingStatus = isOpen ? '營業中' : '已打烊'; // 根據 isOpen 判斷營業狀態
+            // const isOpen = placeDetails.opening_hours?.isOpen(new Date()); // 使用 isOpen() 檢查是否營業
+            const openingStatus = place.openNow ? '營業中' : '已打烊'; // 根據 isOpen 判斷營業狀態
 
             const infoWindow = new google.maps.InfoWindow({
               content: `
@@ -137,21 +140,21 @@ import loader from "./googleMapsLoader";
                     ✕
                   </button>
                   <img 
-                    src="${place.photo || '/api/placeholder/96/96'}" 
-                    alt="${place.name}"
+                    src="${photoGet(place.photoId) || '/api/placeholder/96/96'}" 
+                    alt="${place.name.text}"
                     class="w-[100px] h-[100px] object-cover"
                   />
                   <div class="pl-2 pt-1 w-[200px] overflow-hidden">
-                    <h3 class="text-base font-medium leading-6 truncate text-amber-500">${place.name}</h3>
+                    <h3 class="text-base font-medium leading-6 truncate text-amber-500">${place.name.text}</h3>
                     <div class="flex items-center text-sm text-white">
                       ${place.rating ? `
                         <span class="bg-red-500 w-[46px] h-[18px] rounded-[9px] flex items-center justify-center">
                           <span class="ml-1 text-xs font-bold">${place.rating.toFixed(1)}</span>
                         </span>
-                        <span class="ml-2 text-gray-500">(${place.user_ratings_total || 0}則評論)</span>
+                        <span class="ml-2 text-gray-500">(${place.userRatingCount || 0}則評論)</span>
                       ` : '暫無評分'}
                     </div>
-                    <p class="text-sm text-black-700 line-clamp-2">${place.vicinity || '地址未提供'}</p>
+                    <p class="text-sm text-black-700 line-clamp-2">${place.Address || '地址未提供'}</p>
                     <span class="block">${openingStatus}</span>
                   </div>
                 </div>
@@ -227,19 +230,52 @@ import loader from "./googleMapsLoader";
         if (!mapContainer.value) {
           throw new Error("地圖容器未掛載");
         }
-        await initMap();
-        fetchPlacesFromLocalStorage();
+        
+      await initMap();
+        // fetchPlacesFromLocalStorage();
 
         // 監聽事件
-        window.addEventListener("places-updated", fetchPlacesFromLocalStorage);
+        // window.addEventListener("places-updated", fetchPlacesFromLocalStorage);
       } catch (error) {
         console.error("mounted 鉤子發生錯誤:", error);
       }
     });
 
+    // onUnmounted(() => {
+    //   // 確保移除事件監聽器
+    //   // window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
+    // });
     onUnmounted(() => {
-      // 確保移除事件監聽器
-      window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
-    });
+  clearMarkers();
+  if (map.value) {
+    map.value = null; // 銷毀地圖
+  }
+});
+   
 
+import { useKeywordStore } from '../stores/keywordStore.js'
+
+const Search = useKeywordStore()
+
+const places = computed(() => Search.result); 
+const districts = computed(() => Search.coordinate);
+
+const photoGet = (photoId) =>{
+  return `http://localhost:3000/restaurants/photo?id=${photoId}`
+} 
+
+
+watch(
+  () => places.value,
+  (newPlaces) => {
+    console.log("places 更新:", newPlaces);
+    if (newPlaces && newPlaces.length > 0) {
+      updateMarkers(); // 數據更新時重新繪製標記
+      map.value.setCenter(districts.value)
+    } else {
+      clearMarkers(); // 如果沒有地點，清空標記
+    }
+  },
+  { immediate: true }
+);
 </script>

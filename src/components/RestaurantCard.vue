@@ -28,24 +28,24 @@
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
-            <!-- <span>{{ sortOptions[sortOrder] }}</span> -->
+            <span>{{ sortOptions[sortOrder] }}</span>
             <div>
               <font-awesome-icon :icon="['fas', 'chevron-down']" />
             </div>
           </button>
-          <!-- <div
+          <div
             v-if="sortMenu"
             class="bg-amber-400 rounded-md text-white text-xs w-full p-1 text-center absolute top-full left-0 mt-1 shadow-md z-10">
             <ul>
               <li
                 v-for="(label, value) in sortOptions"
                 :key="value"
-                @click="updateSortOrder(value)"
-                class="cursor-pointer hover:bg-amber-500 py-1">
+                @click="set(value)"
+                class="cursor-pointer hover:bg-amber-500 py-1 z-10">
                 <span>{{ label }}</span>
               </li>
             </ul>
-          </div> -->
+          </div>
         </div>
 
         <!-- 價位分類 -->
@@ -88,15 +88,15 @@
         </div>
       </div>
     </div>
-
-    <!-- :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.id }" -->
-      <div 
-      v-for="place in result" 
-      :key="place.place_id"
-      :data-place-id="place.place_id"
-      class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
-      @mouseenter="handleMouseEnter(place.place_id)"
-      @mouseleave="handleMouseLeave">
+    
+    <div 
+    v-for="place in result" 
+    :key="place.id"
+    :data-place-id="place.id"
+    class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
+    :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.id }"
+    @mouseenter="handleMouseEnter(place.id)"
+    @mouseleave="handleMouseLeave">
       <div class="w-40 h-32 ml-3">
         <img v-if="place.photoId" :src="photoGet(place.photoId)" alt="Place image" class="object-cover w-full h-full" />
       </div>
@@ -146,9 +146,9 @@
 
 <script setup>
 // import { ref, computed, onMounted, onUnmounted } from 'vue';
-// import { useRestaurantStore } from '@/stores/searchPage';
+import { useRestaurantStore } from '@/stores/searchPage';
 
-// const restaurantStore = useRestaurantStore()
+const restaurantStore = useRestaurantStore()
 // const places = ref([]);
 // const sortOrder = ref("default");
 // const costOrder = ref("default");
@@ -208,13 +208,13 @@
 //   costMenu.value = !costMenu.value;
 // };
 
-// const handleMouseEnter = (placeId) => {
-//   restaurantStore.setHoveredPlace(placeId)
-// }
+const handleMouseEnter = (placeId) => {
+  restaurantStore.setHoveredPlace(placeId)
+}
 
-// const handleMouseLeave = () => {
-//   restaurantStore.setHoveredPlace(null)
-// }
+const handleMouseLeave = () => {
+  restaurantStore.setHoveredPlace(null)
+}
 
 // onMounted(() => {
 //   fetchDataFromLocalStorage();
@@ -226,7 +226,7 @@
 // });
 
 import { useKeywordStore } from '../stores/keywordStore.js'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const Search = useKeywordStore()
 const result = computed(() => Search.result)
@@ -236,5 +236,24 @@ const photoGet = (photoId) =>{
 } 
   
 
+const sortMenu = ref(false);
+const costMenu = ref(false);
+const toggleSort = () => {
+  sortMenu.value = !sortMenu.value;
+};
 
+const toggleCost = () => {
+  costMenu.value = !costMenu.value;
+};
+
+const sortOptions = computed(() => Search.sortOptions) //選項
+const sortOrder = computed({ //選擇
+  get: () => Search.sortOrder, 
+  set: (value) => Search.sortOrder(value) 
+})
+
+const set = (value)=> {
+  Search.setSort(value)
+  toggleSort()
+  }
 </script>

@@ -227,7 +227,10 @@ import { computed } from 'vue'
 
 const Search = useKeywordStore()
 
-const keyword = Search.keyword
+const keyword = computed( {
+  get:() => Search.keyword,
+  set:(value) => Search.setKeyword(value)
+}) 
 const handleEnterKey = Search.handleSearch
 
 const selectedDistrict = computed({
