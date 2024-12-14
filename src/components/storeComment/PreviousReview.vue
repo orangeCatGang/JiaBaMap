@@ -1,13 +1,13 @@
 <template>
-    <div class="flex flex-col gap-x-5" v-if="comments.length > 0">
-        <div class="flex gap-x-5 gap-y-6" v-for="(comment, index) in comments" :key="index">
-            <div class="w-12 h-12 overflow-hidden rounded-full bg-slate-300">
+    <div class="flex flex-col gap-y-5" v-if="comments.length > 0">
+        <div class="flex flex-row gap-x-5 py-2.5 w-full max-w-screen-lg mx-auto md:px-0" v-for="(comment, index) in comments" :key="index">
+            <div class="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full bg-slate-300">
                 <img :src="comment.avatar ? comment.avatar : '/src/assets/default_user.png'" alt="avatar" class="object-cover w-full h-full">
             </div>
-            <div class="flex flex-col text-left">
-                <a class="font-bold" href="#">{{ comment.userName }}<span>（{{ comment.reviewNum }} 則評論）</span></a>
+            <div class="flex flex-col flex-1 w-0 text-left">
+                <router-link to="/user" class="font-bold cursor-pointer text-amber-500">{{ comment.userName }}（{{ comment.reviewNum }} 則評論）</router-link>
                 <div class="flex gap-3">
-                    <span v-if="comment.star" class="p-1 text-sm text-white rounded-full bg-amber-500">{{ comment.star }}.0 ★</span>
+                    <span v-if="comment.star" class="px-2 py-1 text-sm font-bold text-white rounded-full bg-amber-500">{{ comment.star }}.0 ★</span>
                     <p v-if="comment.price">均消價位：${{ comment.price }}</p>
                 </div>
                 <p class="text-slate-500">評論日期：{{ comment.commentTime }}</p>
@@ -16,32 +16,44 @@
                     <button @click="toggleLike(comment)" class="p-2 rounded-lg shadow ">{{ comment.likeHint }}</button>
                     <button class="p-2 ml-2 rounded-lg shadow" @click="shareComment(comment)">分享評論</button>
                 </div>
-                <div class="flex gap-4">
-                    <div v-for="(imageUrl, index) in comment.pictures" :key="index" class="overflow-hidden w-52 h-52">
-                        <img :src="imageUrl" class="w-full my-2">
+                <div class="flex gap-4 mt-4 overflow-x-auto scrollbar-hide" style="scroll-snap-type: x mandatory;">
+                    <div v-for="(imageUrl, index) in comment.pictures" :key="index" class="flex-shrink-0 w-32 h-32 overflow-hidden">
+                        <img :src="imageUrl" @click="showPopup(imageUrl)" class="object-cover w-full h-full cursor-pointer">
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- Popup -->
+        <div v-if="popupImage" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+            <div class="relative w-full max-w-screen-md">
+                <span
+                class="absolute p-2 text-black bg-white rounded-full shadow cursor-pointer top-2 right-2"
+                @click="closePopup">
+                ✕
+                </span>
+                <img :src="popupImage" class="object-contain w-1/2 m-auto max-h-1/2" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useCommentStore } from '../../stores/commentStore'
 
-// 讚數
-let likeNum = ref(0)
-let likeHint = ref('表示讚賞')
-let likeStatus = ref(false)
+// 從 Store 獲取評論數據
+const commentStore = useCommentStore()
+const comments = computed(() => commentStore.comments)
 
-const props = defineProps({
-    comments: {
-        type: Array,
-        default: () => [],
-    }
-})
-console.log("Received comments:", props.comments)
+// 圖片popup
+const popupImage = ref(null)
 
+const showPopup = (imageUrl) => {
+    popupImage.value = imageUrl;
+}
+const closePopup = () => {
+      popupImage.value = null;
+}
 
 // 讚數+1
 const toggleLike = (comment) => {
