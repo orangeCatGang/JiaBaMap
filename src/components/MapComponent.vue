@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ref, onMounted, onUnmounted, computed, onBeforeUnmount, nextTick } from "vue";
 import { useRestaurantStore } from '@/stores/searchPage';
 import { watch } from 'vue'
 import loader from "./googleMapsLoader";
@@ -93,15 +93,19 @@ import loader from "./googleMapsLoader";
     };
 
     const updateMarkers = () => {
+      if (!map.value) {
+          console.warn("地圖尚未初始化，跳過標記更新");
+          return;
+        }
       clearMarkers()
       places.value.forEach((place) => {
         const marker = new google.maps.Marker({
           position: {
-            lat: place.location.latitude,
-            lng: place.location.longitude
+            lat: place.lat,
+            lng: place.lng
           },
           map: map.value,
-          title: place.name.text,
+          title: place.name,
           placeId: place.id  // 保存 placeId 以便後續查找
     });
     
@@ -141,11 +145,11 @@ import loader from "./googleMapsLoader";
                   </button>
                   <img 
                     src="${photoGet(place.photoId) || '/api/placeholder/96/96'}" 
-                    alt="${place.name.text}"
+                    alt="${place.name}"
                     class="w-[100px] h-[100px] object-cover"
                   />
                   <div class="pl-2 pt-1 w-[200px] overflow-hidden">
-                    <h3 class="text-base font-medium leading-6 truncate text-amber-500">${place.name.text}</h3>
+                    <h3 class="text-base font-medium leading-6 truncate text-amber-500">${place.name}</h3>
                     <div class="flex items-center text-sm text-white">
                       ${place.rating ? `
                         <span class="bg-red-500 w-[46px] h-[18px] rounded-[9px] flex items-center justify-center">
@@ -227,31 +231,27 @@ import loader from "./googleMapsLoader";
     // 設定事件監聽器以監控 Local Storage 資料變化
     onMounted(async () => {
       try {
+        await nextTick();
         if (!mapContainer.value) {
           throw new Error("地圖容器未掛載");
+        }if (!map.value) {
+          await initMap();
         }
-        
-      await initMap();
-        // fetchPlacesFromLocalStorage();
-
-        // 監聽事件
-        // window.addEventListener("places-updated", fetchPlacesFromLocalStorage);
+      if (places.value && places.value.length > 0) {
+      updateMarkers();
+        }
       } catch (error) {
         console.error("mounted 鉤子發生錯誤:", error);
       }
     });
 
-    // onUnmounted(() => {
-    //   // 確保移除事件監聽器
-    //   // window.removeEventListener("places-updated", fetchPlacesFromLocalStorage);
-    // });
-    onUnmounted(() => {
+  onBeforeUnmount(() => {
   clearMarkers();
   if (map.value) {
+    google.maps.event.clearInstanceListeners(map.value); // 清除地圖上的所有事件
     map.value = null; // 銷毀地圖
   }
 });
-   
 
 import { useKeywordStore } from '../stores/keywordStore.js'
 
@@ -268,6 +268,11 @@ const photoGet = (photoId) =>{
 watch(
   () => places.value,
   (newPlaces) => {
+    if (!map.value) {
+      console.warn("地圖尚未初始化，跳過更新");
+      return;
+    }
+
     console.log("places 更新:", newPlaces);
     if (newPlaces && newPlaces.length > 0) {
       updateMarkers(); // 數據更新時重新繪製標記

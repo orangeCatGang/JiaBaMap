@@ -103,7 +103,7 @@
       <div class="flex flex-col justify-between ml-3 sm:text-xl w-4/5">
         <div class="ml-3">
           <h2 class="font-bold text-gray-500 text-base">
-            <a href="#" class="text-amber-500 hover:text-orange-300">{{ place.name.text }}</a>
+            <a href="#" class="text-amber-500 hover:text-orange-300" @click="StoreId(place.id)">{{ place.name }}</a>
           </h2>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
@@ -216,6 +216,7 @@ const handleMouseLeave = () => {
   restaurantStore.setHoveredPlace(null)
 }
 
+
 // onMounted(() => {
 //   fetchDataFromLocalStorage();
 //   window.addEventListener("places-updated", fetchDataFromLocalStorage);
@@ -227,14 +228,23 @@ const handleMouseLeave = () => {
 
 import { useKeywordStore } from '../stores/keywordStore.js'
 import { computed, ref } from 'vue'
+import { useStore } from '../stores/storePage'
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const Search = useKeywordStore()
+const Store = useStore()
+
+const StoreId = (placeId) => {
+  Store.StoreId(router, placeId)
+}
+
 const result = computed(() => Search.result)
 
 const photoGet = (photoId) =>{
   return `http://localhost:3000/restaurants/photo?id=${photoId}`
 } 
-  
+
 
 const sortMenu = ref(false);
 const costMenu = ref(false);
