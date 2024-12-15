@@ -158,7 +158,7 @@ import loader from "./googleMapsLoader";
                         <span class="ml-2 text-gray-500">(${place.userRatingCount || 0}則評論)</span>
                       ` : '暫無評分'}
                     </div>
-                    <p class="text-sm text-black-700 line-clamp-2">${place.Address || '地址未提供'}</p>
+                    <p class="text-sm text-black-700 line-clamp-2">${place.address || '地址未提供'}</p>
                     <span class="block">${openingStatus}</span>
                   </div>
                 </div>

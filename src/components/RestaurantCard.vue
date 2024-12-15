@@ -28,7 +28,7 @@
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
-            <span>{{ sortOptions[sortOrder] }}</span>
+            <span>{{ Search.sortOptions[Search.sortOrder] }}</span>
             <div>
               <font-awesome-icon :icon="['fas', 'chevron-down']" />
             </div>
@@ -40,7 +40,7 @@
               <li
                 v-for="(label, value) in sortOptions"
                 :key="value"
-                @click="set(value)"
+                @click="setSortOrder(value)"
                 class="cursor-pointer hover:bg-amber-500 py-1 z-10">
                 <span>{{ label }}</span>
               </li>
@@ -56,7 +56,7 @@
             <div>
               <font-awesome-icon :icon="['fas', 'bars']" />
             </div>
-            <!-- <span>{{ costOptions[costOrder] }}</span> -->
+            <span>{{ Search.costOptions[Search.selectedCost] }}</span>
             <div>
               <font-awesome-icon :icon="['fas', 'chevron-down']" />
             </div>
@@ -68,8 +68,9 @@
               <li
                 v-for="(label, value) in costOptions"
                 :key="value"
+                @click="setCostRange(value)"
                 class="cursor-pointer hover:bg-amber-500 py-1 ">
-                <!-- <span>{{ label }}</span> -->
+                <span>{{ label }}</span>
               </li>
             </ul>
           </div>
@@ -78,7 +79,7 @@
         <!-- 篩選條件 -->
         <div class="w-1/4 p-1 mx-1 mt-2 text-xs text-center border rounded-md md:w-1/6 md:border-none">
           <label>
-            <input type="checkbox"> 營業中
+            <input type="checkbox" v-model="Search.isOpen"  > 營業中
           </label>
         </div>
         <div class="w-1/4 p-1 mx-1 mt-2 text-xs text-center border rounded-md md:w-1/6 md:border-none">
@@ -90,7 +91,7 @@
     </div>
     
     <div 
-    v-for="place in result" 
+    v-for="place in Search.filteredResult" 
     :key="place.id"
     :data-place-id="place.id"
     class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
@@ -113,7 +114,8 @@
           <p class="mr-2 font-light">(評論數: {{ place.userRatingCount }})</p>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
-          <!-- <p class="mr-2 font-light">距離 {{ place.distance.toFixed(2) }} 公里</p> -->
+          <p class="mr-2 font-light">平均消費 {{ place.startPrice}} ~ {{ place.endPrice}} 元</p>
+          <p class="mr-2 font-light">距離 {{ place.districts || "??" }} 公里</p>
         </div>
         <div class="mt-3 mx-3 hidden md:flex items-center text-sm">
           <span>
@@ -145,109 +147,39 @@
 </template>
 
 <script setup>
-// import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRestaurantStore } from '@/stores/searchPage';
+import { useKeywordStore } from '../stores/keywordStore.js'
+import { computed, ref } from 'vue'
+import { useStore } from '../stores/storePage'
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const restaurantStore = useRestaurantStore()
-// const places = ref([]);
-// const sortOrder = ref("default");
-// const costOrder = ref("default");
-// const sortMenu = ref(false);
-// const costMenu = ref(false);
+const Search = useKeywordStore()
+const Store = useStore()
 
-// const sortOptions = {
-//   default: "預設",
-//   distance: "最近距離",
-//   rating: "最高評分",
-//   reviews: "最高人氣"
-// };
 
-// const costOptions = {
-//   default: "不選擇",
-//   cost1: "150以內",
-//   cost2: "150~600",
-//   cost3: "600~1200",
-//   cost4: "1200以上"
-// };
-
-// const sortedPlaces = computed(() => {
-//   if (sortOrder.value === "distance") {
-//     return [...places.value].sort((a, b) => (a.distance || 0) - (b.distance || 0));
-//   } else if (sortOrder.value === "rating") {
-//     return [...places.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-//   } else if (sortOrder.value === "reviews") {
-//     return [...places.value].sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0));
-//   } else {
-//     return places.value;
-//   }
-// });
-
-// const fetchDataFromLocalStorage = () => {
-//   const localStorageUtil = {
-//     get(key) {
-//       const value = localStorage.getItem(key);
-//       return value ? JSON.parse(value) : null;
-//     },
-//   };
-
-//   places.value = localStorageUtil.get("places") || [];
-//   sortOrder.value = localStorageUtil.get("sortOrder") || "default";
-// };
-
-// const updateSortOrder = (value) => {
-//   sortOrder.value = value;
-//   localStorage.setItem("sortOrder", JSON.stringify(value));
-//   sortMenu.value = false;
-// };
-
-// const toggleSort = () => {
-//   sortMenu.value = !sortMenu.value;
-// };
-
-// const toggleCost = () => {
-//   costMenu.value = !costMenu.value;
-// };
 
 const handleMouseEnter = (placeId) => {
   restaurantStore.setHoveredPlace(placeId)
 }
-
 const handleMouseLeave = () => {
   restaurantStore.setHoveredPlace(null)
 }
 
 
-// onMounted(() => {
-//   fetchDataFromLocalStorage();
-//   window.addEventListener("places-updated", fetchDataFromLocalStorage);
-// });
-
-// onUnmounted(() => {
-//   window.removeEventListener("places-updated", fetchDataFromLocalStorage);
-// });
-
-import { useKeywordStore } from '../stores/keywordStore.js'
-import { computed, ref } from 'vue'
-import { useStore } from '../stores/storePage'
-import { useRouter } from "vue-router";
-const router = useRouter();
-
-const Search = useKeywordStore()
-const Store = useStore()
-
 const StoreId = (placeId) => {
   Store.StoreId(router, placeId)
 }
 
+
 const result = computed(() => Search.result)
-
-const photoGet = (photoId) =>{
-  return `http://localhost:3000/restaurants/photo?id=${photoId}`
-} 
-
-
 const sortMenu = ref(false);
 const costMenu = ref(false);
+const sortOptions = computed(() => Search.sortOptions)
+const costOptions = computed(() => Search.costOptions)
+const filteredOpen = Search.filteredOpen
+
 const toggleSort = () => {
   sortMenu.value = !sortMenu.value;
 };
@@ -256,14 +188,17 @@ const toggleCost = () => {
   costMenu.value = !costMenu.value;
 };
 
-const sortOptions = computed(() => Search.sortOptions) //選項
-const sortOrder = computed({ //選擇
-  get: () => Search.sortOrder, 
-  set: (value) => Search.sortOrder(value) 
-})
-
-const set = (value)=> {
-  Search.setSort(value)
+const setSortOrder = (value)=> {
+  Search.setSortOrder(value)
   toggleSort()
-  }
+  };
+
+const setCostRange = (value) => {
+  Search.setCostRange(value)
+  toggleCost()
+};
+
+const photoGet = (photoId) =>{
+  return `http://localhost:3000/restaurants/photo?id=${photoId}`
+} 
 </script>

@@ -239,11 +239,8 @@ const selectedDistrict = computed({
 })
 const districts = computed(() => Search.districts)
 
-const onDistrictChange = () => {
-  console.log("座標更新為：", Search.coordinate)
-}
 
-  
+
 </script>
 
 
@@ -274,7 +271,6 @@ const onDistrictChange = () => {
       class="outline-none" 
       v-model="selectedDistrict" 
       id="district"
-      @change="onDistrictChange"
       >
         <option class="bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
           {{ district}}

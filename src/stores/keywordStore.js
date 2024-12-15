@@ -28,8 +28,57 @@ export const useKeywordStore = defineStore('keyword', {
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
     },
-    result:[], //搜尋資料
+
+    selectedCost:"default",
+    costOptions: {
+      default: "全部",
+      cost1: "200內",
+      cost2: "201~400",
+      cost3: "401~600",
+      cost4:"601~800",
+      cost5: "801~1000",
+      cost6: "1000以上",
+    },
+   isOpen: false,
+   result:[], //搜尋資料 
   }),
+  
+  getters: {
+    filteredResult: (state) => {
+      let filtered = [...state.result]; // 複製 result，避免修改原始資料
+
+      // 1. 過濾營業中
+      if (state.isOpen) {
+        filtered = filtered.filter((place) => place.openNow);
+      }
+
+      // 2. 過濾價格分類
+      if (state.selectedCost !== 'default') {
+        filtered = filtered.filter((place) => {
+          const price = place.startPrice || 0;
+        if (state.selectedCost === 'cost1') return price <= 200;
+        if (state.selectedCost === 'cost2') return price > 200 && price <= 400;
+        if (state.selectedCost === 'cost3') return price > 400 && price <= 600;
+        if (state.selectedCost === 'cost4') return price > 600 && price <= 800;
+        if (state.selectedCost === 'cost5') return price > 800 && price <= 1000;
+        if (state.selectedCost === 'cost6') return price > 1000;
+        });
+      }
+
+      // 3. 排序結果
+      const sortFunctions = {
+        default: () => 0,
+        rating: (a, b) => (b.rating || 0) - (a.rating || 0),
+        reviews: (a, b) => (b.userRatingCount || 0) - (a.userRatingCount || 0),
+      };
+      filtered.sort(sortFunctions[state.sortOrder]);
+
+      return filtered;
+    },
+    
+  },
+  
+  
   actions: {
      navigateToSearch(router, tag) {
       this.keyword = tag
@@ -40,6 +89,8 @@ export const useKeywordStore = defineStore('keyword', {
         // 確保導航完成後執行搜尋
         this.handleSearch();
       });
+
+      
     },
     
 
@@ -68,23 +119,41 @@ export const useKeywordStore = defineStore('keyword', {
       }
     },
 
-    setSort(value){
+    setSortOrder(value){
       this.sortOrder = value
-      this.selectSort()
     },
+    setOpen(){
+      this.isOpen = !this.isOpen
+    },
+    setCostRange(value){
+       this.selectedCost = value
+   },
+   setResult(value){
+     this.result = value;
+   }
+    // selectSort(){
+    //   if (!this.result || this.result.length === 0) {
+    //     console.warn('結果為空，無法進行排序')
+    //     return
+    //   }
+    //   const sortFunctions = {
+    //     // distance:(a, b) => (a.distance || 0) - (b.distance || 0),
+    //     rating: (a, b) => (b.rating || 0) - (a.rating || 0),
+    //     reviews: (a, b) => (b.userRatingCount || 0) - (a.userRatingCount || 0)
+    //   }
+    //   const selectedSort = sortFunctions[this.sortOrder] || ((a, b) => 0)
+    //   this.result.sort(selectedSort)
+    // },
 
-    selectSort(){
-      if (!this.result || this.result.length === 0) {
-        console.warn('結果為空，無法進行排序')
-        return
-      }
-      const sortFunctions = {
-        // distance:(a, b) => (a.distance || 0) - (b.distance || 0),
-        rating: (a, b) => (b.rating || 0) - (a.rating || 0),
-        reviews: (a, b) => (b.userRatingCount || 0) - (a.userRatingCount || 0)
-      }
-      const selectedSort = sortFunctions[this.sortOrder] || ((a, b) => 0)
-      this.result.sort(selectedSort)
-    }
+
+    // filteredOpen() {
+    //   this.isOpen = !this.isOpen
+    //   if (this.isOpen) {
+    //     console.log("篩選");
+    //     this.result = this.result.filter((place) => place.openNow);
+    //     return
+    //   }
+    //   return this.result;
+    // },
   }
 })
