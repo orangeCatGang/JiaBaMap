@@ -1,7 +1,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, onErrorCaptured } from "vue";
 import { defineStore } from "pinia";
 
-export const useRestaurantStore = defineStore("restaurant", () => {
+export const useStore = defineStore("store", () => {
   const windowWidth = ref(window.innerWidth);
   const groupSize = ref(3);
   const totalItems = 20;
@@ -21,6 +21,15 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
   const bannerPhoto = ref("");
+
+  let placesId = ""
+
+  const StoreId = (router, placeId) => {
+    placesId = placeId
+    router.push({
+      path: "/store",
+      })
+  }
   
   const cachedItemsPerPage = ref(3);
   // 相似餐廳相關狀態
@@ -45,7 +54,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const photoIds = [];
   const fetchPlaceDetail = async () => {
     // // FIXME
-    const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc";
+    // const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc";
 
     //串接後端API
     try {
@@ -380,6 +389,8 @@ const resetGroupIndex = () => {
     storeMap,
     googleMapsUri,
     openNow,
+    placesId,
+    StoreId,
     
     // API 方法
     fetchPlaceDetail,
