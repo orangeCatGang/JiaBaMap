@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, ref, computed, watch, onUnmounted  } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRestaurantStore } from '../stores/storePage';
+import { useStore } from '../stores/storePage';
 import StoreComment from '../components/storeComment/StoreComment.vue'
 import Header from "../components/Header.vue";
 import StoreType from '../components/HomePage/StoreType.vue';
 import SearchTag from '../components/SearchTag.vue';
 
-const restaurantStore = useRestaurantStore();
+const restaurantStore = useStore();
 onMounted(async () => {
     try {
         restaurantStore.initializeWindowListener();

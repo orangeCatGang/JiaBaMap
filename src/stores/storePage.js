@@ -1,7 +1,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, onErrorCaptured } from "vue";
 import { defineStore } from "pinia";
 
-export const useRestaurantStore = defineStore("restaurant", () => {
+export const useStore = defineStore("store", () => {
   const windowWidth = ref(window.innerWidth);
   const groupSize = ref(3);
   const totalItems = 20;
@@ -21,6 +21,16 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
   const bannerPhoto = ref("");
+
+  let placesId = ""
+
+  const StoreId = (router, placeId) => {
+    placesId = placeId
+    router.push({
+      path: "/store",
+      })
+  }
+  
   const cachedItemsPerPage = ref(3);
   // 相似餐廳相關狀態
   const similarRestaurants = ref([]);
@@ -44,7 +54,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
   const photoIds = [];
   const fetchPlaceDetail = async () => {
     // // FIXME
-    const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc";
+    // const placesId = "ChIJPwFtMx-oQjQRyDjE21ZvByc";
 
     //串接後端API
     try {
@@ -150,7 +160,7 @@ export const useRestaurantStore = defineStore("restaurant", () => {
           : null,
         place_id: restaurant.place_id
       }))
-      console.log('Mapped restaurants:', similarRestaurants.value); // 添加这行查看处理后的数据
+      console.log('Mapped restaurants:', similarRestaurants.value); 
       resetGroupIndex()
     } catch (err) {
       console.error("Fetch error:", err.message);
@@ -375,6 +385,9 @@ export const useRestaurantStore = defineStore("restaurant", () => {
     storeMap,
     googleMapsUri,
     openNow,
+    placesId,
+    StoreId,
+    
     // API 方法
     fetchPlaceDetail,
     fetchStorePhoto,

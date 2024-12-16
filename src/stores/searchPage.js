@@ -8,8 +8,9 @@ export const useRestaurantStore = defineStore('restaurant', () => {
     hoveredPlaceId.value = placeId;
   }
 
+
   return {
     hoveredPlaceId,
-    setHoveredPlace
+    setHoveredPlace,
   };
 });
