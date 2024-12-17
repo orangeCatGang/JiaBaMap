@@ -1,4 +1,4 @@
-<h1 align="center">JiaBaMap 佳霸地圖 🍽️</h1>
+<h1 align="center">JiaBaMap 呷飽地圖 🍽️</h1>
 
 <p align="center">
   <img alt="Version" src="https://img.shields.io/badge/version-0.0.0-blue.svg?cacheSeconds=2592000" />
