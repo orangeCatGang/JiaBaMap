@@ -48,7 +48,7 @@ const filteredArticles = computed(() => {
 
 const changeStatus = (status) => {
   router.push({
-    path: '/MyArticle',
+    path: '/myarticle',
     query: { status }
   });
 };
@@ -62,7 +62,7 @@ const deleteArticle = (id) => {
 
 const editArticle = (id) => {
   router.push({
-    path: `/MyArticle/edit/${id}`
+    path: `/myarticle/edit/${id}`
   });
 };
 
