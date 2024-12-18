@@ -66,8 +66,12 @@
             </div>
           <!-- 主選單 -->
           <div class="items-center space-x-4 md:flex main-menu">
-              <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">發表食記</a>
-              <a href="#" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">專欄文章</a>
+            <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+                    發表食記
+            </router-link> 
+              <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+                專欄文章
+              </router-link>
               <!-- 店家專區的下拉選單 -->
               <div class="relative inline-block text-left group">
                   <button class="p-2 rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none min-w-20">

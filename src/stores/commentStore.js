@@ -6,6 +6,7 @@ export const useCommentStore = defineStore('commentStore',
             comments: [],
         }),
         actions: {
+
             addComment(newComment){
                 this.comments.unshift(newComment)
             }
