@@ -1,39 +1,24 @@
-<script>
-import Header from './components/Header.vue'; // 引入 Header 組件
-import Footer from './components/Footer.vue'; // 引入 Footer 組件
-import RestaurantCard from './components/RestaurantCard.vue';
-import MapComponent from './components/MapComponent.vue';
-import FilterBar from './components/FilterBar.vue';
-import Login from './components/Login.vue';
-
-import { ref, onMounted } from "vue";
-export default {
-  components: {
-    Header,
-    FilterBar,
-    RestaurantCard,
-    MapComponent,
-    Footer,
-    Login
-  },
-};
-
-
+<script setup>
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+import RestaurantCard from './components/RestaurantCard.vue'
+import MapComponent from './components/MapComponent.vue'
+import FilterBar from './components/FilterBar.vue'
+import Login from './components/Login.vue'
 </script>
 
 <template>
-  
-  <Login /> 
-    <!-- <Header /> -->
-    <!-- <FilterBar /> -->
-    <div class="overflow-x-auto hide-scrollbar">
-      <!-- <div class="flex">
-          <RestaurantCard />
-          <MapComponent/>
-      </div> -->
-      <RouterView />
-      <Footer />
-    </div>
+  <Login />
+  <!-- <Header /> -->
+  <!-- <FilterBar /> -->
+  <div class="overflow-x-auto hide-scrollbar">
+    <!-- <div class="flex">
+      <RestaurantCard />
+      <MapComponent/>
+    </div> -->
+    <RouterView />
+    <Footer />
+  </div>
 </template>
 
 <style scoped>
