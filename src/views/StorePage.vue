@@ -59,7 +59,7 @@ const {
     userRatingCount,
     startPrice,
     endPrice,
-    weekdayDescriptions,
+    weekDayDescriptions,
     formattedAddress,
     websiteUri,
     nationalPhoneNumber,
@@ -196,9 +196,6 @@ document.addEventListener('click', handleDocumentClick);
         <div class="relative">
             <img v-if="bannerPhoto" :src="bannerPhoto" alt="Banner" class="object-cover w-full h-48">
             <img v-else src="../assets/logo.jpg" alt="Banner" class="object-cover w-full h-48">
-            <!-- <div class="absolute top-0 left-0 p-4 text-2xl text-white bg-black bg-opacity-50">
-            和牛涮 日式鍋物放題 台南中華西店
-            </div> -->
         </div>
         <!-- 導航標籤 -->
         <nav class="flex items-center px-4 space-x-4 overflow-x-auto bg-white shadow md:overflow-visible">
@@ -219,7 +216,8 @@ document.addEventListener('click', handleDocumentClick);
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
-                        <a class="text-black rounded ">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
+                        <a v-if="startPrice != null && endPrice != null" class="text-black rounded ">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
+                        <a v-else class="text-black rounded ">均消價位：未提供</a>
                         <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                         <a href="#" class="hover:text-amber-500">火鍋</a>
                         <a href="#" class="hover:text-amber-500">日本料理</a>
@@ -262,20 +260,21 @@ document.addEventListener('click', handleDocumentClick);
                         class="absolute z-10 w-48 transform -translate-x-1/2 bg-white rounded-md shadow-lg left-1/2"
                         >
                             <ul class="mt-1">
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[0] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[1] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[2] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[3] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[4] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[5] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekdayDescriptions[6] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[0] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[1] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[2] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[3] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[4] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekDayDescriptions[5] }}</a></li>
+                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekDayDescriptions[6] }}</a></li>
                             </ul>
                         </div>
                     </div>
                     <p>店家地址 | {{ formattedAddress }}</p>
-                    <p>均消價位 | {{ `${startPrice}-${endPrice}` }}元</p>
-                    <p>訂位電話 | {{ nationalPhoneNumber }}</p>
-                    <a :href="websiteUri">
+                    <p v-if="startPrice != null && endPrice != null">均消價位 | {{ `${startPrice}-${endPrice}` }}元</p>
+                    <p v-else>均消價位 | 未提供</p>
+                    <p >訂位電話 | {{ nationalPhoneNumber != null ? nationalPhoneNumber : '未提供' }}</p>
+                    <a v-if="websiteUri" :href="websiteUri">
                         <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'calendar-week']" class="w-5 h-5 mr-2 text-amber-500" />相關連結</button>
                     </a>
                     <button class="p-2 mt-6 mr-4 rounded-lg shadow"><font-awesome-icon :icon="['fas', 'arrow-up-from-bracket']" class="w-5 h-5 mr-2 text-amber-500"/>分享餐廳</button>
