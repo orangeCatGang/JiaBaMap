@@ -173,12 +173,10 @@ const StoreId = (placeId) => {
 }
 
 
-const result = computed(() => Search.result)
 const sortMenu = ref(false);
 const costMenu = ref(false);
 const sortOptions = computed(() => Search.sortOptions)
 const costOptions = computed(() => Search.costOptions)
-const filteredOpen = Search.filteredOpen
 
 const toggleSort = () => {
   sortMenu.value = !sortMenu.value;
