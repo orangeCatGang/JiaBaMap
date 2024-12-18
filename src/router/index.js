@@ -35,13 +35,13 @@ const routes = [
     component: Login,
   },
   {
-    path: '/MyArticle',
-    name: 'MyArticle',
+    path: '/myarticle',
+    name: 'myArticle',
     component: MyArticle,
   },
   {
-    path: '/ArticleList',
-    name: 'ArticleList',
+    path: '/articlelist',
+    name: 'articlelist',
     component: ArticleList,
   },
 ]
