@@ -66,10 +66,10 @@
             </div>
           <!-- 主選單 -->
           <div class="items-center space-x-4 md:flex main-menu">
-            <router-link to="/MyArticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+            <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
                     發表食記
             </router-link> 
-              <router-link to="/ArticleList" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
+              <router-link to="/articlelist" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
                 專欄文章
               </router-link>
               <!-- 店家專區的下拉選單 -->
