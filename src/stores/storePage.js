@@ -130,6 +130,12 @@ export const useStore = defineStore("store", () => {
   const fetchSimilarRestaurants = async () => {
     try {
       console.log('正在獲取相似餐廳...');
+      console.log('當前餐廳 ID:', placesId);
+
+      if (!placesId) {
+        console.error('缺少 placesId');
+        return;
+      }
 
       // 先獲取當前餐廳的詳細資訊
       const detailRes = await fetch(
@@ -141,18 +147,19 @@ export const useStore = defineStore("store", () => {
       }
 
       const detailData = await detailRes.json();
+      console.log('當前餐廳詳細資訊:', detailData);
 
-      // 使用餐廳名稱的一部分作為關鍵字搜尋
-      const keyword = detailData.displayName.split(' ')[0]; // 取餐廳名稱的第一個詞
-      const res = await fetch(
-        `http://localhost:3000/restaurants/search?keyword=${encodeURIComponent(keyword)}`
+      // 使用當前餐廳的位置搜尋附近餐廳
+      const searchRes = await fetch(
+        `http://localhost:3000/restaurants/search?keyword=餐廳&lat=${detailData.lat}&lng=${detailData.lng}`
       );
 
-      if (!res.ok) {
-        throw new Error(`HTTP Error: ${res.status}`);
+      if (!searchRes.ok) {
+        throw new Error(`HTTP Error: ${searchRes.status}`);
       }
 
-      const resJson = await res.json();
+      const resJson = await searchRes.json();
+      console.log('搜尋結果:', resJson);
 
       // 過濾掉當前餐廳並映射資料
       similarRestaurants.value = resJson
@@ -167,12 +174,12 @@ export const useStore = defineStore("store", () => {
             `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
           place_id: restaurant.id
         }))
-        .slice(0, 9); // 限制顯示數量
+        .slice(0, 15); // 限制顯示 15 間餐廳
 
-      console.log('已獲取相似餐廳:', similarRestaurants.value);
+      console.log('處理後的相似餐廳:', similarRestaurants.value);
       resetGroupIndex();
     } catch (err) {
-      console.error("獲取相似餐廳失敗:", err.message);
+      console.error("獲取相似餐廳失敗:", err);
       similarRestaurants.value = []; // 發生錯誤時清空列表
     }
   };
@@ -274,7 +281,6 @@ export const useStore = defineStore("store", () => {
     return Math.ceil(12 / itemsPerPage) - 1; // 12組資料，大螢幕4頁，小螢幕6頁
   });
 
-  // 修改 displayRecommendedRestaurants 計算
   // 修改 displayRecommendedRestaurants 計算
   const displayRecommendedRestaurants = computed(() => {
     const restaurants = recommendedRestaurants.value || [];

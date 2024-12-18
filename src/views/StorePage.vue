@@ -6,7 +6,8 @@ import StoreComment from '../components/storeComment/StoreComment.vue'
 import Header from "../components/Header.vue";
 import StoreType from '../components/HomePage/StoreType.vue';
 import SearchTag from '../components/SearchTag.vue';
-
+import VueCarousel from 'vue-carousel';
+Vue.use(VueCarousel);
 const restaurantStore = useStore();
 onMounted(async () => {
     try {
