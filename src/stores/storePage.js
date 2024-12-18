@@ -12,7 +12,7 @@ export const useStore = defineStore("store", () => {
   const userRatingCount = ref("");
   const startPrice = ref("");
   const endPrice = ref("");
-  const weekdayDescriptions = ref("");
+  const weekDayDescriptions = ref("");
   const formattedAddress = ref("");
   const websiteUri = ref("");
   const nationalPhoneNumber = ref("");
@@ -68,7 +68,7 @@ export const useStore = defineStore("store", () => {
       userRatingCount.value = resJson.userRatingCount;
       startPrice.value = resJson.startPrice;
       endPrice.value = resJson.endPrice;
-      weekdayDescriptions.value = resJson.weekdayDescriptions;
+      weekDayDescriptions.value = resJson.weekDayDescriptions;
       formattedAddress.value = resJson.formattedAddress;
       websiteUri.value = resJson.websiteUri;
       nationalPhoneNumber.value = resJson.nationalPhoneNumber;
@@ -376,7 +376,7 @@ export const useStore = defineStore("store", () => {
     userRatingCount,
     startPrice,
     endPrice,
-    weekdayDescriptions,
+    weekDayDescriptions,
     formattedAddress,
     websiteUri,
     nationalPhoneNumber,

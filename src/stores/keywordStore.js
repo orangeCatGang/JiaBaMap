@@ -8,13 +8,14 @@ export const useKeywordStore = defineStore('keyword', {
     sortOrder:"default", //排序
     sortOptions:{
       default: "預設",
-      // distance: "最近距離",
+      distance: "最近距離",
       rating: "最高評分",
       reviews: "最高人氣"
     },
     selectedDistrict: "中正區", //當前選擇地區 
     coordinate: { lat: 25.032404, lng: 121.519033 },//當前地區座標
     districts:{ //地區選項
+        "我的位置": null,
         "中正區": { lat: 25.032404, lng: 121.519033 },
         "大同區": { lat: 25.063093, lng: 121.513305 },
         "中山區": { lat: 25.0685, lng: 121.5266 },
@@ -28,7 +29,7 @@ export const useKeywordStore = defineStore('keyword', {
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
     },
-
+    distance:"",
     selectedCost:"default",
     costOptions: {
       default: "全部",
@@ -46,12 +47,13 @@ export const useKeywordStore = defineStore('keyword', {
   getters: {
     filteredResult: (state) => {
       let filtered = [...state.result]; // 複製 result，避免修改原始資料
-
+      
+      
       // 1. 過濾營業中
       if (state.isOpen) {
         filtered = filtered.filter((place) => place.openNow);
       }
-
+      
       // 2. 過濾價格分類
       if (state.selectedCost !== 'default') {
         filtered = filtered.filter((place) => {
@@ -62,20 +64,66 @@ export const useKeywordStore = defineStore('keyword', {
         if (state.selectedCost === 'cost4') return price > 600 && price <= 800;
         if (state.selectedCost === 'cost5') return price > 800 && price <= 1000;
         if (state.selectedCost === 'cost6') return price > 1000;
-        });
+      });
       }
-
+      const calculateDistance = (lat1, lng1, lat2, lng2) => {
+        const R = 6371; // 地球半徑 (公里)
+        const toRadians = (deg) => deg * (Math.PI / 180); // 角度轉弧度
+        const dLat = toRadians(lat2 - lat1);
+        const dLng = toRadians(lng2 - lng1);
+        const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
+        Math.sin(dLng / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // 返回距離 (公里)
+      };
+      
+      filtered = filtered.map((place) => ({
+        ...place,
+        distance: calculateDistance(
+          state.coordinate.lat, 
+          state.coordinate.lng, 
+          place.lat, 
+          place.lng
+        )
+      }));
+      
       // 3. 排序結果
       const sortFunctions = {
         default: () => 0,
         rating: (a, b) => (b.rating || 0) - (a.rating || 0),
         reviews: (a, b) => (b.userRatingCount || 0) - (a.userRatingCount || 0),
+        distance: (a, b) => a.distance - b.distance,
       };
       filtered.sort(sortFunctions[state.sortOrder]);
-
+      
+      
       return filtered;
     },
     
+    // placesWithDistance(state) {
+    //   const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    //     const R = 6371; // 地球半徑 (公里)
+    //     const toRadians = (deg) => deg * (Math.PI / 180); // 角度轉弧度
+    //     const dLat = toRadians(lat2 - lat1);
+    //     const dLng = toRadians(lng2 - lng1);
+    //     const a = Math.sin(dLat / 2) ** 2 +
+    //               Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
+    //               Math.sin(dLng / 2) ** 2;
+    //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    //     return R * c; // 返回距離 (公里)
+    //   };
+      
+    //   return state.result.map((place) => ({
+    //     ...place,
+    //     distance: calculateDistance(
+    //       state.coordinate.lat, 
+    //       state.coordinate.lng, 
+    //       place.lat, 
+    //       place.lng
+    //     )
+    //   }));
+    // }
   },
   
   
@@ -105,19 +153,45 @@ export const useKeywordStore = defineStore('keyword', {
       }
       const response = await axios.get(`http://localhost:3000/restaurants/search?keyword=${this.keyword}&lat=${this.coordinate.lat}&lng=${this.coordinate.lng}`)
       this.result = response.data
-      
+
+      this.distance = calculateDistance(
+        this.coordinate.lat,
+        this.coordinate.lng,
+        this.result.lat,
+        this.result.lng
+      )
       
     },
 
     // 取得座標
     selectDistrict(districtName) {
+      if (districtName === "我的位置"){
+          navigator.geolocation.getCurrentPosition( (position) => {
+            this.districts[districtName] = {
+                      lat: position.coords.latitude,
+                      lng: position.coords.longitude,
+                    };
+                  })
+                }
       if (this.districts[districtName]) {
         this.selectedDistrict = districtName
         this.coordinate = this.districts[districtName]
       } else {
-        console.error(`行政區 "${districtName}" 不存在！`)
+        alert("尚未取得您的位置，請允許定位後再試！")
       }
     },
+
+    // calculateDistance(lat1, lng1, lat2, lng2){
+    //         const R = 6371;
+    //         const dLat = degToRad(lat2 - lat1);
+    //         const dLng = degToRad(lng2 - lng1);
+    //         const a =
+    //           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    //           Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    //         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    //         return R * c;
+    //       },
+    
 
     setSortOrder(value){
       this.sortOrder = value
@@ -131,29 +205,6 @@ export const useKeywordStore = defineStore('keyword', {
    setResult(value){
      this.result = value;
    }
-    // selectSort(){
-    //   if (!this.result || this.result.length === 0) {
-    //     console.warn('結果為空，無法進行排序')
-    //     return
-    //   }
-    //   const sortFunctions = {
-    //     // distance:(a, b) => (a.distance || 0) - (b.distance || 0),
-    //     rating: (a, b) => (b.rating || 0) - (a.rating || 0),
-    //     reviews: (a, b) => (b.userRatingCount || 0) - (a.userRatingCount || 0)
-    //   }
-    //   const selectedSort = sortFunctions[this.sortOrder] || ((a, b) => 0)
-    //   this.result.sort(selectedSort)
-    // },
-
-
-    // filteredOpen() {
-    //   this.isOpen = !this.isOpen
-    //   if (this.isOpen) {
-    //     console.log("篩選");
-    //     this.result = this.result.filter((place) => place.openNow);
-    //     return
-    //   }
-    //   return this.result;
-    // },
+    
   }
 })

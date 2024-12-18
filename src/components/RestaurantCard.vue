@@ -115,7 +115,7 @@
         </div>
         <div class="flex mt-3 ml-3 text-xs">
           <p class="mr-2 font-light">平均消費 {{ place.startPrice}} ~ {{ place.endPrice}} 元</p>
-          <p class="mr-2 font-light">距離 {{ place.districts || "??" }} 公里</p>
+          <p class="mr-2 font-light">距離 {{ place.distance.toFixed(2) || "??" }} 公里</p>
         </div>
         <div class="mt-3 mx-3 hidden md:flex items-center text-sm">
           <span>
