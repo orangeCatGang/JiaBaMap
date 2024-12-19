@@ -290,7 +290,7 @@ export default {
       </div>
     </header>
       <!-- 搜尋區塊 -->
-      <div class="relative flex flex-col items-center justify-center w-screen m-auto text-center bg-top bg-no-repeat bg-cover h-96 bg-index_searchBG"
+      <div class="relative flex flex-col items-center justify-center m-auto text-center bg-top bg-no-repeat bg-cover h-96 bg-index_searchBG"
       aria-label="Photo by Ivan Torres on Unsplash">
         <div class="absolute inset-0 bg-gray-800 opacity-40"></div>
           <h1 class="z-10 px-3 mt-8 text-3xl text-white md:text-5xl text-bold">想知道哪裡有美食？</h1>
