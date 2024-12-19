@@ -27,8 +27,6 @@ const {
     openNow,
     storePhoto,
     bannerPhoto,
-    similarRestaurants,
-    recommendedRestaurants,
     staticMapUrl,
 } = storeToRefs(restaurantStore);
 

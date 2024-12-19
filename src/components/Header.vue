@@ -57,7 +57,7 @@
   
   <template>
       <!-- 頁頭（導航欄） -->
-      <header class="flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 md:space-y-0">
+      <header class="fixed top-0 left-0 right-0 z-50 flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 md:space-y-0 bg-white">
           <!-- LOGO -->
           <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
           <!-- 搜尋欄容器 -->

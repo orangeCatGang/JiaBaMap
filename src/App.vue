@@ -9,15 +9,12 @@ import Login from './components/Login.vue'
 
 <template>
   <Login />
-  <!-- <Header /> -->
-  <!-- <FilterBar /> -->
-  <div class="overflow-x-auto hide-scrollbar">
-    <!-- <div class="flex">
-      <RestaurantCard />
-      <MapComponent/>
-    </div> -->
-    <RouterView />
-    <Footer />
+  <div class="relative min-h-screen">
+    <Header />
+    <div class="overflow-x-auto hide-scrollbar">
+      <RouterView />
+      <Footer />
+    </div>
   </div>
 </template>
 
@@ -25,12 +22,13 @@ import Login from './components/Login.vue'
 /* 隱藏滾動條 */
 .hide-scrollbar {
   overflow-x: auto;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-top: 60px;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 </style>
 
