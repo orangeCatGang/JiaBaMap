@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from "vue"
 import { useRouter } from 'vue-router';
  
-export const useUser = defineStore('user', () => {
+export const useAuth = defineStore('auth', () => {
     const userData = ref("")
     const router = useRouter()
 
@@ -62,7 +62,7 @@ export const useUser = defineStore('user', () => {
 
 
     return {
-        useUser,
+        useAuth,
         initializeGoogleButton,
         userData,
         logout,

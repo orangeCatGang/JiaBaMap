@@ -153,9 +153,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUser } from '@/stores/userStore'
+import { useAuth } from '@/stores/authStore'
 
-const user = useUser()
+const user = useAuth()
 const { userData, logout} = user
 const menuVisible = ref(false);
 const isEditing = ref(false);

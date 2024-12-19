@@ -1,11 +1,11 @@
 <template>
 <div  v-if="visible" class="modal-overlay bg-black/50 w-full h-screen flex justify-center items-center fixed top-0 left-0 z-50 ml-0" @click.self="closeModal">
-        <div class="flex-col w-1/5 h-1/2 justify-items-center bg-white rounded-lg p-3 leading-10">
+        <div class="flex-col w-1/5 min-w-[260px] h-1/2 justify-items-center bg-white rounded-lg p-3 leading-10">
             <h1>登入 「 JiaBaMap 」</h1>
             <div class="">
                 <img src="../assets/logo.jpg" alt="">
             </div>
-            <p class="m-3">按下登入以使用更多功能！！</p>
+            <p class="m-3 mb-12">按下登入以使用更多功能！！</p>
             <div id="googleButton"></div>
             <div v-if="userData" class="user-info">
                 <h3>登錄成功！</h3>
@@ -21,10 +21,10 @@
 
 <script setup>
 import { ref, onMounted, watch, nextTick} from "vue";
-import { useUser } from '../stores/userStore';
+import { useAuth } from '../stores/authStore';
 
 
-const user = useUser();
+const user = useAuth();
 
 
 const props = defineProps({

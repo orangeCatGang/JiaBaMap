@@ -29,7 +29,6 @@ export const useKeywordStore = defineStore('keyword', {
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
     },
-    distance:"",
     selectedCost:"default",
     costOptions: {
       default: "全部",
@@ -97,8 +96,6 @@ export const useKeywordStore = defineStore('keyword', {
         distance: (a, b) => a.distance - b.distance,
       };
       filtered.sort(sortFunctions[state.sortOrder]);
-      
-      
       return filtered;
     },
   },
@@ -114,8 +111,6 @@ export const useKeywordStore = defineStore('keyword', {
         // 確保導航完成後執行搜尋
         this.handleSearch();
       });
-
-      
     },
     
 
@@ -130,14 +125,6 @@ export const useKeywordStore = defineStore('keyword', {
       }
       const response = await axios.get(`http://localhost:3000/restaurants/search?keyword=${this.keyword}&lat=${this.coordinate.lat}&lng=${this.coordinate.lng}`)
       this.result = response.data
-
-      this.distance = calculateDistance(
-        this.coordinate.lat,
-        this.coordinate.lng,
-        this.result.lat,
-        this.result.lng
-      )
-      
     },
 
     // 取得座標

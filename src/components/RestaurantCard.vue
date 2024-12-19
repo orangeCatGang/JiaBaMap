@@ -84,7 +84,7 @@
         </div>
         <div class="w-1/4 p-1 mx-1 mt-2 text-xs text-center border rounded-md md:w-1/6 md:border-none">
           <label>
-            <input type="checkbox"> 外帶外送
+            <input type="checkbox"> 可訂購
           </label>
         </div>
       </div>
