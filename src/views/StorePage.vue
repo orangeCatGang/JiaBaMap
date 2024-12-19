@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed, watch, onUnmounted  } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useStore } from '../stores/storePage';
 import StoreComment from '../components/storeComment/StoreComment.vue'
@@ -9,16 +9,35 @@ import SearchTag from '../components/SearchTag.vue';
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 
-
-
-
+// Store 初始化
 const restaurantStore = useStore();
+
+// 從 store 中解構需要的屬性
+const {
+    storeName,
+    rating,
+    userRatingCount,
+    startPrice,
+    endPrice,
+    weekdayDescriptions,
+    formattedAddress,
+    websiteUri,
+    nationalPhoneNumber,
+    googleMapsUri,
+    openNow,
+    storePhoto,
+    bannerPhoto,
+    similarRestaurants,
+    recommendedRestaurants,
+    staticMapUrl,
+} = storeToRefs(restaurantStore);
+
+// 下拉選單狀態
+const isDropdownVisible = ref(false);
+
+// 頁面載入時的初始化
 onMounted(async () => {
     try {
-        restaurantStore.initializeWindowListener();
-        
-        console.log('Fetching data...'); // 添加日誌
-        
         await restaurantStore.fetchPlaceDetail();
         console.log('Place details fetched');
         
@@ -34,11 +53,6 @@ onMounted(async () => {
         await restaurantStore.fetchRecommendedRestaurants();
         console.log('recommendedRestaurants fetched');
         
-        currentGroupSize.value = getInitialGroupSize();
-        window.addEventListener('resize', handleResize);
-
-        console.log('Recommended restaurants fetched');
-        
         await restaurantStore.fetchSearchTopics();
         console.log('Search topics fetched');
         
@@ -47,135 +61,11 @@ onMounted(async () => {
     }
 });
 
-onUnmounted(() => {
-    window.removeEventListener('resize', handleResize);
-});
-
-const {
-    storeName,
-    rating,
-    userRatingCount,
-    startPrice,
-    endPrice,
-    weekdayDescriptions,
-    formattedAddress,
-    websiteUri,
-    nationalPhoneNumber,
-    googleMapsUri,
-    openNow,
-    storePhoto,
-    bannerPhoto,
-    // 相似餐廳相關
-    similarRestaurants,
-    currentGroupIndex,
-    maxGroupIndex,
-    displayRestaurants,
-    groupSize,
-    
-    // 推薦餐廳相關
-    recommendedRestaurants,
-    recommendedGroupIndex,
-    maxRecommendedGroupIndex,
-    displayRecommendedRestaurants,
-    
-    // 靜態地圖
-    staticMapUrl,
-    
-    searchTopics,
-    fetchSearchTopics,
-} = storeToRefs(restaurantStore);
-
-
-const {
-    nextGroup: handleNextGroup,
-    prevGroup: handlePrevGroup,
-    nextRecommendedGroup,
-    prevRecommendedGroup
-} = restaurantStore;
-
-
-const currentGroupSize = ref(3); // 預設值
-const stableGroups = ref([]);
-
-
-// 監聽視窗大小變化
-function handleResize() {
-  const newGroupSize = getInitialGroupSize();
-  if (newGroupSize !== currentGroupSize.value) {
-    currentGroupSize.value = newGroupSize;
-    // 重新分組但保持當前頁的相對位置
-    const currentFirstItem = recommendedGroupIndex.value * currentGroupSize.value;
-    createStableGroups(recommendedRestaurants.value);
-    // 計算新的分組索引
-    recommendedGroupIndex.value = Math.floor(currentFirstItem / newGroupSize);
-  }
-}
-
-// 計算當前要顯示的餐廳組
-const currentDisplayGroup = computed(() => {
-  return stableGroups.value[recommendedGroupIndex.value] || [];
-});
-
-// 監聽原始數據變化，重新進行分組
-watch([() => recommendedRestaurants.value, currentGroupSize], ([newRestaurants]) => {
-  if (newRestaurants && newRestaurants.length > 0) {
-    createStableGroups(newRestaurants);
-  }
-}, { immediate: true });
-
-// 創建固定的分組
-const createStableGroups = (restaurants) => {
-  const groups = [];
-  for (let i = 0; i < restaurants.length; i += currentGroupSize.value) {
-    groups.push(restaurants.slice(i, i + currentGroupSize.value));
-  }
-  stableGroups.value = groups;
-};
-
-
-
-// 根據螢幕寬度決定每組顯示數量
-function getInitialGroupSize() {
-  if (window.innerWidth < 768) {  // mobile
-    return 2;
-  } else if (window.innerWidth < 1024) {  // tablet
-    return 3;
-  } else {  // desktop
-    return 3;
-  }
-}
-
-
-// 同樣為推薦餐廳添加處理函數
-const handlePrevRecommendedGroup = () => {
-  if (recommendedGroupIndex.value <= 0) {
-    recommendedGroupIndex.value = maxRecommendedGroupIndex.value;
-  } else {
-    recommendedGroupIndex.value--;
-  }
-};
-
-const handleNextRecommendedGroup = () => {
-  if (recommendedGroupIndex.value >= maxRecommendedGroupIndex.value) {
-    recommendedGroupIndex.value = 0;
-  } else {
-    recommendedGroupIndex.value++;
-  }
-};
-
-
-
-
-const isDropdownVisible = ref(false);
-
-// 用於點擊頁面其他地方時隱藏下拉選單
+// 點擊頁面其他地方時隱藏下拉選單
 function handleDocumentClick(event) {
     const button = document.getElementById('dropdownButton');
     const menu = document.getElementById('dropdownMenu');
-    if (!button || !menu) {
-        return; // 如果元素不存在，直接退出函數
-    }
-
+    
     if (!button || !menu) return;
 
     if (!button.contains(event.target) && !menu.contains(event.target)) {
@@ -186,7 +76,6 @@ function handleDocumentClick(event) {
 document.addEventListener('click', handleDocumentClick);
 </script>
 
-
 <template>
     <div>
         <Header/>
@@ -194,10 +83,8 @@ document.addEventListener('click', handleDocumentClick);
         <div class="relative">
             <img v-if="bannerPhoto" :src="bannerPhoto" alt="Banner" class="object-cover w-full h-48">
             <img v-else src="../assets/logo.jpg" alt="Banner" class="object-cover w-full h-48">
-            <!-- <div class="absolute top-0 left-0 p-4 text-2xl text-white bg-black bg-opacity-50">
-            和牛涮 日式鍋物放題 台南中華西店
-            </div> -->
         </div>
+
         <!-- 導航標籤 -->
         <nav class="flex items-center px-4 space-x-4 overflow-x-auto bg-white shadow md:overflow-visible">
             <button class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap">總覽</button>
@@ -206,10 +93,12 @@ document.addEventListener('click', handleDocumentClick);
             <button class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap">評論</button>
             <button class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap">更多餐廳</button>
         </nav>
-        <!-- 店家資訊區 -->
+
+        <!-- 主要內容區 -->
         <div class="w-full max-w-[1024px] mx-auto bg-white mt-14 px-4 md:px-6 py-4">
+            <!-- 店家基本資訊 -->
             <div class="flex flex-col items-center space-y-4 md:flex-row md:items-start md:space-y-0 md:space-x-4">
-                <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg ">
+                <img :src="storePhoto" alt="Store Thumbnail" class="object-cover w-40 h-32 rounded-lg">
                 <div class="space-y-2 text-center md:text-left">
                     <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
@@ -217,7 +106,7 @@ document.addEventListener('click', handleDocumentClick);
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
-                        <a class="text-black rounded ">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
+                        <a class="text-black rounded">均消價位：{{ `${startPrice}-${endPrice}` }}元</a>
                         <a href="#" class="text-blue-400 rounded"><font-awesome-icon :icon="['fas', 'star']" />找相似餐廳</a>
                         <a href="#" class="hover:text-amber-500">火鍋</a>
                         <a href="#" class="hover:text-amber-500">日本料理</a>
@@ -226,16 +115,17 @@ document.addEventListener('click', handleDocumentClick);
                     </div>
                 </div>
             </div>
+
             <!-- 店家詳情區 -->
             <div class="flex items-center mt-10 space-x-4">
-                <div flex flex-col >
+                <!-- 地圖和評價 -->
+                <div class="flex flex-col">
                     <a :href="googleMapsUri" target="_blank" class="cursor-pointer hover:opacity-90">
                         <img :src="staticMapUrl" alt="formattedAddress" class="object-cover w-40 h-40 rounded-lg">
                     </a>
-                    <!-- 評價部分 -->
                     <a :href="googleMapsUri" target="_blank" class="cursor-pointer hover:opacity-90">
                         <div class="w-40 mt-2">
-                            <div class="flex items-center justify-center py-1 mb-1 rounded bg-amber-500 ">
+                            <div class="flex items-center justify-center py-1 mb-1 rounded bg-amber-500">
                                 <font-awesome-icon :icon="['fab', 'google']" class="w-4 h-4 mr-1 text-blue-600"/>
                                 <div class="flex items-center">
                                     <span class="text-sm">評價:</span>
@@ -245,28 +135,31 @@ document.addEventListener('click', handleDocumentClick);
                         </div>
                     </a>
                 </div>
+
+                <!-- 店家資訊 -->
                 <div class="space-y-2">
+                    <!-- 營業時間下拉選單 -->
                     <div class="relative inline-block ml-12">
                         <button 
-                        id="dropdownButton" 
-                        class="p-2 font-bold rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none"
-                        @click="isDropdownVisible = !isDropdownVisible">
-                        {{ openNow? "目前營業中":"目前休息中" }}
+                            id="dropdownButton" 
+                            class="p-2 font-bold rounded-md text-amber-500 hover:bg-amber-100 focus:outline-none"
+                            @click="isDropdownVisible = !isDropdownVisible">
+                            {{ openNow? "目前營業中":"目前休息中" }}
                             <span class="ml-1">&#x25BC;</span>
                         </button>
                         <div 
-                        id="dropdownMenu" 
-                        v-if="isDropdownVisible"
-                        class="absolute z-10 w-48 transform -translate-x-1/2 bg-white rounded-md shadow-lg left-1/2"
+                            id="dropdownMenu" 
+                            v-if="isDropdownVisible"
+                            class="absolute z-10 w-48 transform -translate-x-1/2 bg-white rounded-md shadow-lg left-1/2"
                         >
                             <ul class="mt-1">
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[0] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[1] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[2] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[3] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[4] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[5] }}</a></li>
-                            <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekdayDescriptions[6] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[0] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[1] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[2] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[3] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[4] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">{{ weekdayDescriptions[5] }}</a></li>
+                                <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100 rounded-bl-md rounded-br-md">{{ weekdayDescriptions[6] }}</a></li>
                             </ul>
                         </div>
                     </div>
@@ -301,7 +194,7 @@ document.addEventListener('click', handleDocumentClick);
                              class="flex justify-center"
                          >
                              <Slide 
-                                 v-for="restaurant in similarRestaurants.slice(0, 14)" 
+                                 v-for="restaurant in similarRestaurants.slice(0, 15)" 
                                  :key="restaurant.place_id"
                                  class="flex-shrink-0 px-1"
                              >
