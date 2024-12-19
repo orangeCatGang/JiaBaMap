@@ -29,7 +29,6 @@ export const useKeywordStore = defineStore('keyword', {
         "南港區": { lat: 25.0553, lng: 121.6171 },
         "文山區": { lat: 24.9987, lng: 121.5549 },
     },
-    distance:"",
     selectedCost:"default",
     costOptions: {
       default: "全部",
@@ -46,36 +45,37 @@ export const useKeywordStore = defineStore('keyword', {
   
   getters: {
     filteredResult: (state) => {
-      let filtered = [...state.result]; // 複製 result，避免修改原始資料
+      let filtered = [...state.result]; 
       
       
-      // 1. 過濾營業中
+      // 過濾營業中
       if (state.isOpen) {
         filtered = filtered.filter((place) => place.openNow);
       }
       
-      // 2. 過濾價格分類
+      // 過濾價格分類
       if (state.selectedCost !== 'default') {
         filtered = filtered.filter((place) => {
           const price = place.startPrice || 0;
         if (state.selectedCost === 'cost1') return price <= 200;
-        if (state.selectedCost === 'cost2') return price > 200 && price <= 400;
-        if (state.selectedCost === 'cost3') return price > 400 && price <= 600;
-        if (state.selectedCost === 'cost4') return price > 600 && price <= 800;
-        if (state.selectedCost === 'cost5') return price > 800 && price <= 1000;
-        if (state.selectedCost === 'cost6') return price > 1000;
+        if (state.selectedCost === 'cost2') return price >= 200 && price < 400;
+        if (state.selectedCost === 'cost3') return price >= 400 && price < 600;
+        if (state.selectedCost === 'cost4') return price >= 600 && price < 800;
+        if (state.selectedCost === 'cost5') return price >= 800 && price < 1000;
+        if (state.selectedCost === 'cost6') return price >= 1000;
       });
       }
+      // 與店家距離
       const calculateDistance = (lat1, lng1, lat2, lng2) => {
-        const R = 6371; // 地球半徑 (公里)
-        const toRadians = (deg) => deg * (Math.PI / 180); // 角度轉弧度
+        const R = 6371; 
+        const toRadians = (deg) => deg * (Math.PI / 180); 
         const dLat = toRadians(lat2 - lat1);
         const dLng = toRadians(lng2 - lng1);
         const a = Math.sin(dLat / 2) ** 2 +
         Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
         Math.sin(dLng / 2) ** 2;
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // 返回距離 (公里)
+        return R * c; 
       };
       
       filtered = filtered.map((place) => ({
@@ -88,7 +88,7 @@ export const useKeywordStore = defineStore('keyword', {
         )
       }));
       
-      // 3. 排序結果
+      // 排序
       const sortFunctions = {
         default: () => 0,
         rating: (a, b) => (b.rating || 0) - (a.rating || 0),
@@ -96,34 +96,8 @@ export const useKeywordStore = defineStore('keyword', {
         distance: (a, b) => a.distance - b.distance,
       };
       filtered.sort(sortFunctions[state.sortOrder]);
-      
-      
       return filtered;
     },
-    
-    // placesWithDistance(state) {
-    //   const calculateDistance = (lat1, lng1, lat2, lng2) => {
-    //     const R = 6371; // 地球半徑 (公里)
-    //     const toRadians = (deg) => deg * (Math.PI / 180); // 角度轉弧度
-    //     const dLat = toRadians(lat2 - lat1);
-    //     const dLng = toRadians(lng2 - lng1);
-    //     const a = Math.sin(dLat / 2) ** 2 +
-    //               Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * 
-    //               Math.sin(dLng / 2) ** 2;
-    //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    //     return R * c; // 返回距離 (公里)
-    //   };
-      
-    //   return state.result.map((place) => ({
-    //     ...place,
-    //     distance: calculateDistance(
-    //       state.coordinate.lat, 
-    //       state.coordinate.lng, 
-    //       place.lat, 
-    //       place.lng
-    //     )
-    //   }));
-    // }
   },
   
   
@@ -137,8 +111,6 @@ export const useKeywordStore = defineStore('keyword', {
         // 確保導航完成後執行搜尋
         this.handleSearch();
       });
-
-      
     },
     
 
@@ -153,14 +125,6 @@ export const useKeywordStore = defineStore('keyword', {
       }
       const response = await axios.get(`http://localhost:3000/restaurants/search?keyword=${this.keyword}&lat=${this.coordinate.lat}&lng=${this.coordinate.lng}`)
       this.result = response.data
-
-      this.distance = calculateDistance(
-        this.coordinate.lat,
-        this.coordinate.lng,
-        this.result.lat,
-        this.result.lng
-      )
-      
     },
 
     // 取得座標
@@ -180,18 +144,6 @@ export const useKeywordStore = defineStore('keyword', {
         alert("尚未取得您的位置，請允許定位後再試！")
       }
     },
-
-    // calculateDistance(lat1, lng1, lat2, lng2){
-    //         const R = 6371;
-    //         const dLat = degToRad(lat2 - lat1);
-    //         const dLng = degToRad(lng2 - lng1);
-    //         const a =
-    //           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    //           Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    //         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    //         return R * c;
-    //       },
-    
 
     setSortOrder(value){
       this.sortOrder = value
