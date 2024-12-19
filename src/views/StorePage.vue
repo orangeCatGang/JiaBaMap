@@ -178,8 +178,6 @@ function handleDocumentClick(event) {
         return; // 如果元素不存在，直接退出函數
     }
 
-    if (!button || !menu) return;
-
     if (!button.contains(event.target) && !menu.contains(event.target)) {
         isDropdownVisible.value = false;
     }
@@ -193,10 +191,22 @@ document.addEventListener('click', handleDocumentClick);
     <div>
         <Header/>
         <!-- 橫幅圖片區 -->
-        <div class="relative">
-            <img v-if="bannerPhoto" :src="bannerPhoto" alt="Banner" class="object-cover w-full h-48">
-            <img v-else src="../assets/logo.jpg" alt="Banner" class="object-cover w-full h-48">
+        <div class="relative w-full h-48">
+            <img 
+                v-if="bannerPhoto" 
+                :src="bannerPhoto" 
+                alt="Banner" 
+                class="object-cover w-full h-full"
+            />
+            <img 
+                v-else 
+                src="../assets/logo.jpg" 
+                alt="Banner" 
+                class="object-cover w-full h-full"
+            />
+            <div class="absolute top-0 left-0 w-full h-full bg-gray-800 opacity-25"></div>
         </div>
+
         <!-- 導航標籤 -->
         <nav class="flex items-center px-4 space-x-4 overflow-x-auto bg-white shadow md:overflow-visible">
             <button class="px-4 py-4 font-bold border-b-2 border-transparent text-amber-500 hover:border-amber-500 whitespace-nowrap">總覽</button>
