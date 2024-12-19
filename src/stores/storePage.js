@@ -16,6 +16,8 @@ export const useStore = defineStore("store", () => {
   const storePhoto = ref("");
   const googleMapsUri = ref("");
   const bannerPhoto = ref("");
+  const lat = ref("");
+  const lng = ref("");
 
   let placesId = ""
 
@@ -51,6 +53,8 @@ export const useStore = defineStore("store", () => {
       nationalPhoneNumber.value = resJson.nationalPhoneNumber;
       googleMapsUri.value = resJson.googleMapsUri;
       openNow.value = resJson.openNow;
+      lat.value = resJson.lat;
+      lng.value = resJson.lng;
       resJson.photoIds.forEach((id) => {
         photoIds.push(id);
       }); //一個array含兩組id
@@ -88,19 +92,10 @@ export const useStore = defineStore("store", () => {
   };
 
   const staticMapUrl = computed(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    const zoom = 15; // 縮放級別
-    const size = "160x160"; // 地圖大小
-    const marker = "color:red|label"; // 標記點樣式
-
     // 如果沒有位置資訊，返回空
-    if (!formattedAddress.value) return null;
+    if (!formattedAddress.value || !lat.value || !lng.value) return null;
 
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(
-      formattedAddress.value
-    )}&zoom=${zoom}&size=${size}&markers=${marker}|${encodeURIComponent(
-      formattedAddress.value
-    )}&key=${apiKey}`;
+    return `http://localhost:3000/restaurants/staticmap?lat=${lat.value}&lng=${lng.value}`;
   });
 
   // 獲取類似餐廳
@@ -236,5 +231,7 @@ export const useStore = defineStore("store", () => {
     // 推薦餐廳相關
     recommendedRestaurants,
     fetchRecommendedRestaurants,
+    lat,
+    lng,
   };
 });
