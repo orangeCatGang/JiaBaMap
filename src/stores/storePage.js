@@ -181,12 +181,24 @@ export const useStore = defineStore("store", () => {
       // 獲取相似餐廳的 ID 列表
       const similarRestaurantIds = similarRestaurants.value.map(r => r.place_id);
       
-      // 過濾掉當前餐廳和相似餐廳
+      // 使用 Set 來儲存已經添加的餐廳 ID
+      const addedIds = new Set();
+      
+      // 過濾掉當前餐廳、相似餐廳和重複的餐廳
       recommendedRestaurants.value = resJson
-        .filter(restaurant => 
-          restaurant.id !== placesId && 
-          !similarRestaurantIds.includes(restaurant.id)
-        )
+        .filter(restaurant => {
+          // 如果是當前餐廳、相似餐廳或已經添加過，則跳過
+          if (
+            restaurant.id === placesId || 
+            similarRestaurantIds.includes(restaurant.id) ||
+            addedIds.has(restaurant.id)
+          ) {
+            return false;
+          }
+          // 將餐廳 ID 加入已添加集合
+          addedIds.add(restaurant.id);
+          return true;
+        })
         .map(restaurant => ({
           name: restaurant.name,
           rating: restaurant.rating || "N/A",
@@ -195,7 +207,7 @@ export const useStore = defineStore("store", () => {
             `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
           place_id: restaurant.id
         }))
-        .slice(0, 12);
+        .slice(0, 15);
 
     } catch (err) {
       console.error("獲取推薦餐廳失敗:", err);
