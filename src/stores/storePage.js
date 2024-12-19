@@ -155,7 +155,8 @@ export const useStore = defineStore("store", () => {
           isOpen: restaurant.openNow || false,
           photoUrl: restaurant.photoId ?
             `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
-          place_id: restaurant.id
+          place_id: restaurant.id,
+          googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
         }))
         .slice(0, 15); // 限制顯示 15 間餐廳
 
@@ -205,7 +206,8 @@ export const useStore = defineStore("store", () => {
           userRatingCount: restaurant.userRatingCount || 0,
           photoUrl: restaurant.photoId ?
             `http://localhost:3000/restaurants/photo?id=${restaurant.photoId}` : null,
-          place_id: restaurant.id
+          place_id: restaurant.id,
+          googleMapsUri: `https://www.google.com/maps/place/?q=place_id:${restaurant.id}`
         }))
         .slice(0, 15);
 
