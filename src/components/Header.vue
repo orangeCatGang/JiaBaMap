@@ -10,6 +10,7 @@
       // 控制選單開關的狀態
       const isMenuOpen = ref(false);
       const menuContainer = ref(null);
+      const isSearchOpen = ref(false);
   
       const toggleMenu = () => {
         isMenuOpen.value = !isMenuOpen.value;
@@ -31,8 +32,11 @@
           isMenuOpen.value = false; // 點擊外部時關閉選單
         }
       };
-     
-      
+  
+      const toggleSearch = () => {
+        isSearchOpen.value = !isSearchOpen.value;
+      };
+  
       // 在元件掛載和卸載時設置和移除事件監聽器
       onMounted(() => {
         window.addEventListener("resize", checkScreenWidth);
@@ -49,6 +53,8 @@
         isMenuOpen,
         toggleMenu,
         menuContainer,
+        isSearchOpen,
+        toggleSearch,
       };
     },
   };
@@ -59,11 +65,11 @@
       <!-- 頁頭（導航欄） -->
       <header class="fixed top-0 left-0 right-0 z-50 flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 md:space-y-0 bg-white">
           <!-- LOGO -->
-          <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
+          <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px] md:w-[300px]"></router-link>
           <!-- 搜尋欄容器 -->
-            <div>
+          <div class="hidden md:block">
             <SearchInput />
-            </div>
+          </div>
           <!-- 主選單 -->
           <div class="items-center space-x-4 md:flex main-menu">
             <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
@@ -129,10 +135,17 @@
           <div ref="menuContainer" class="md:hidden">
             <!-- 主選單：小於 768px 顯示為漢堡圖標 -->
             <div class="flex items-center space-x-4 md:hidden hamburger-menu">
-                <a href="#"><font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5 text-amber-500" /></a>
-                <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
-                <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
+                <button @click="toggleSearch" class="text-amber-500">
+                    <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="w-5 h-5" />
                 </button>
+                <button @click="toggleMenu" class="text-amber-500 focus:outline-none">
+                    <font-awesome-icon :icon="['fas', 'bars']" class="w-6 h-6" />
+                </button>
+            </div>
+            <!-- 小螢幕的搜尋欄 -->
+            <div v-if="isSearchOpen" 
+                 class="absolute left-0 right-0 p-4 bg-white shadow-md top-full">
+                <SearchInput />
             </div>
             <!-- 小螢幕的下拉選單 -->
             <div v-if="isMenuOpen" class="absolute z-50 w-48 bg-white rounded-lg shadow-md top-16 right-4">
