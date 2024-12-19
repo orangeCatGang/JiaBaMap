@@ -189,7 +189,7 @@ document.addEventListener('click', handleDocumentClick);
                              :wrap-around="true"
                              :transition="500"
                              snap-align="center"
-                             :itemsToScroll="1"
+                             :itemsToScroll="3"
                              :mouseDrag="true"
                              class="flex justify-center"
                          >
@@ -245,7 +245,7 @@ document.addEventListener('click', handleDocumentClick);
                         :wrap-around="true"
                         :transition="500"
                         snap-align="center"
-                        :itemsToScroll="1"
+                        :itemsToScroll="3"
                         :mouseDrag="true"
                         class="flex justify-center"
                     >

@@ -138,9 +138,20 @@ export const useStore = defineStore("store", () => {
       const resJson = await searchRes.json();
       console.log('搜尋結果:', resJson);
 
-      // 過濾掉當前餐廳並映射資料
+      // 使用 Set 來儲存已經添加的餐廳 ID
+      const addedIds = new Set();
+      
+      // 過濾掉當前餐廳和重複的餐廳
       similarRestaurants.value = resJson
-        .filter(restaurant => restaurant.id !== placesId)
+        .filter(restaurant => {
+          // 如果是當前餐廳或已經添加過，則跳過
+          if (restaurant.id === placesId || addedIds.has(restaurant.id)) {
+            return false;
+          }
+          // 將餐廳 ID 加入已添加集合
+          addedIds.add(restaurant.id);
+          return true;
+        })
         .map((restaurant) => ({
           name: restaurant.name,
           rating: restaurant.rating || "N/A",
