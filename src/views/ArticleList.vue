@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
@@ -220,9 +220,30 @@ const toggleReplyForm = (commentId) => {
  }
 };
 
+// 點擊外部關閉選單
+const handleClickOutside = (event) => {
+  publishedArticles.value.forEach(article => {
+    article.comments.forEach(comment => {
+      // 如果點擊的不是選單按鈕或選單內容
+      if (!event.target.closest('.menu-button') && !event.target.closest('.menu-content')) {
+        comment.showOptions = false;
+        // 同時處理回覆的選單
+        comment.replies?.forEach(reply => {
+          reply.showOptions = false;
+        });
+      }
+    });
+  });
+};
+
 // 在 onMounted 中調用
 onMounted(async () => {
   fetchArticles();      // 然後獲取所有文章
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 
 </script>
@@ -327,104 +348,41 @@ onMounted(async () => {
                 <span class="text-xs md:text-sm text-gray-500">{{ formatDate(comment.date) }}</span>
               </div>
               <p class="text-sm md:text-base text-gray-700">{{ comment.content }}</p>
-              
 
               <div class="flex items-center justify-between mt-2">
-                  <div class="flex gap-4 items-center">
-                    <button 
-                  @click="toggleLike(article.id, comment.id)"
-                  class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
-                >
-                  <font-awesome-icon 
-                    :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']" 
-                    class="text-xl"
-                  />
-                  <span>{{ comment.likes }}</span>
-                </button>
+                <div class="flex gap-4 items-center w-full">
                   <button 
-                    @click="toggleReplyForm(comment.id)"
-                    class="text-blue-500 text-sm hover:text-blue-600"
+                    @click="toggleLike(article.id, comment.id)"
+                    class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
                   >
-                    {{ newReply.replyingTo === comment.id ? '取消回覆' : '回覆' }}
+                    <font-awesome-icon 
+                      :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+                      class="text-xl"
+                    />
+                    <span>{{ comment.likes }}</span>
                   </button>
-                </div>
-                
-                <!-- 三點選單 -->
-                <div class="relative">
-                  <button 
-                    @click="comment.showOptions = !comment.showOptions"
-                    class="text-gray-500 hover:text-gray-700 px-2 font-bold"
-                  >
-                    ⋮
-                  </button>
-                  <!-- 下拉選單 -->
-                  <div 
-                    v-if="comment.showOptions"
-                    class="absolute right-0 mt-1 bg-white rounded-lg shadow-lg py-1 min-w-[100px] z-10"
-                  >
+                  <div class="flex items-center gap-2">
                     <button 
-                      @click="deleteComment(article.id, comment.id); comment.showOptions = false"
-                      class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                      @click="toggleReplyForm(comment.id)"
+                      class="text-blue-500 text-sm hover:text-blue-600"
                     >
-                      刪除
+                      {{ newReply.replyingTo === comment.id ? '取消回覆' : '回覆' }}
                     </button>
-                  </div>
-                </div>
-              </div>
-              <!-- 回覆表單 -->
-                <div 
-                    v-if="newReply.replyingTo === comment.id"
-                    class="mt-3 pl-4 border-l-2 border-gray-200"
-                  >
-                    <div class="relative">
-                      <textarea
-                        v-model="newReply.content"
-                        rows="2"
-                        maxlength="200"
-                        class="w-full border rounded p-2 text-sm"
-                        placeholder="寫下您的回覆..."
-                      ></textarea>
-                      <p v-if="newReply.content.length > 0" class="text-xs text-gray-500 mt-1">
-                        還可以輸入 {{ 200 - newReply.content.length }} 字
-                      </p>
-                    </div>
-                    <button
-                      @click="addReply(article.id, comment.id)"
-                      class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                    >
-                      發表回覆
-                    </button>
-                </div>
-              <!-- 回覆列表 -->
-              <div 
-                  v-if="comment.replies && comment.replies.length > 0"
-                  class="mt-3 pl-4 border-l-2 border-gray-200 space-y-3"
-                >
-                  <div 
-                    v-for="reply in comment.replies"
-                    :key="reply.id"
-                    class="bg-gray-50 p-3 rounded"
-                  >
-                  <div class="flex justify-between items-center mb-1">
-                    <div>
-                      <span class="font-medium text-sm">{{ reply.user }}</span>
-                      <span class="text-xs text-gray-500 ml-2">{{ formatDate(reply.date) }}</span>
-                    </div>
                     <!-- 三點選單 -->
-                    <div class="relative">
+                    <div class="relative group">
                       <button 
-                        @click="reply.showOptions = !reply.showOptions"
-                        class="text-gray-500 hover:text-gray-700 px-2 font-bold"
+                        @click.stop="comment.showOptions = !comment.showOptions"
+                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
                       >
-                        ⋮
+                        <font-awesome-icon :icon="['fas', 'ellipsis']" />
                       </button>
                       <!-- 下拉選單 -->
                       <div 
-                        v-if="reply.showOptions"
-                        class="absolute right-0 mt-1 bg-white rounded-lg shadow-lg py-1 min-w-[100px] z-10"
+                        v-if="comment.showOptions"
+                        class="absolute left-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                       >
                         <button 
-                          @click="deleteReply(article.id, comment.id, reply.id); reply.showOptions = false"
+                          @click="deleteComment(article.id, comment.id); comment.showOptions = false"
                           class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
                         >
                           刪除
@@ -432,9 +390,52 @@ onMounted(async () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- 回覆表單 -->
+              <div 
+                v-if="newReply.replyingTo === comment.id"
+                class="mt-3 pl-4 border-l-2 border-gray-200"
+              >
+                <div class="relative">
+                  <textarea
+                    v-model="newReply.content"
+                    rows="2"
+                    maxlength="200"
+                    class="w-full border rounded p-2 text-sm"
+                    placeholder="寫下您的回覆..."
+                  ></textarea>
+                  <p v-if="newReply.content.length > 0" class="text-xs text-gray-500 mt-1">
+                    還可以輸入 {{ 200 - newReply.content.length }} 字
+                  </p>
+                </div>
+                <button
+                  @click="addReply(article.id, comment.id)"
+                  class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                >
+                  發表回覆
+                </button>
+              </div>
+
+              <!-- 回覆列表 -->
+              <div 
+                v-if="comment.replies && comment.replies.length > 0"
+                class="mt-3 pl-4 border-l-2 border-gray-200 space-y-3"
+              >
+                <div 
+                  v-for="reply in comment.replies"
+                  :key="reply.id"
+                  class="bg-gray-50 p-3 rounded"
+                >
+                  <div class="flex justify-between items-center mb-1">
+                    <div>
+                      <span class="font-medium text-sm">{{ reply.user }}</span>
+                      <span class="text-xs text-gray-500 ml-2">{{ formatDate(reply.date) }}</span>
+                    </div>
+                  </div>
                   <p class="text-sm text-gray-700">{{ reply.content }}</p>
-                  <!-- 點讚按鈕 -->
-                  <div class="flex gap-2 mt-2">
+                  <div class="flex items-center gap-4 mt-2">
                     <button 
                       @click="toggleLike(article.id, comment.id, reply.id)"
                       class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
@@ -445,6 +446,27 @@ onMounted(async () => {
                       />
                       <span>{{ reply.likes }}</span>
                     </button>
+                    <!-- 三點選單 -->
+                    <div class="relative group">
+                      <button 
+                        @click.stop="reply.showOptions = !reply.showOptions"
+                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                      >
+                        <font-awesome-icon :icon="['fas', 'ellipsis']" />
+                      </button>
+                      <!-- 下拉選單 -->
+                      <div 
+                        v-if="reply.showOptions"
+                        class="absolute left-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                      >
+                        <button 
+                          @click="deleteReply(article.id, comment.id, reply.id); reply.showOptions = false"
+                          class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                        >
+                          刪除
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
