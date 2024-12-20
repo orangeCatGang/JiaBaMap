@@ -8,6 +8,7 @@ import StoreType from '../components/HomePage/StoreType.vue';
 import SearchTag from '../components/SearchTag.vue';
 import SimilarRestaurants from '../components/storePage/SimilarRestaurants.vue';
 import RecommendedRestaurants from '../components/storePage/RecommendedRestaurants.vue';
+import SearchInput from '../components/SearchInput.vue';
 
 // Store 初始化
 const restaurantStore = useStore();
@@ -77,6 +78,9 @@ document.addEventListener('click', handleDocumentClick);
 <template>
     <div>
         <Header/>
+        <div class="fixed top-2 left-1/2 transform -translate-x-1/2 z-40 w-[600px] hidden md:block">
+            <SearchInput />
+        </div>
         <!-- 橫幅圖片區 -->
         <div class="relative">
             <img v-if="bannerPhoto" :src="bannerPhoto" alt="Banner" class="object-cover w-full h-48">

@@ -247,43 +247,43 @@ const districts = computed(() => Search.districts)
 <template>
   <!-- 統一的搜尋框 -->
   <form
-    class="flex items-center px-4 space-x-2 bg-white border rounded-full  shadow-sm border-amber-500 h-11 md:space-x-4"
+    class="flex items-center px-4 space-x-2 bg-white border rounded-full shadow-sm border-amber-500 h-11 md:space-x-4 w-full"
     @submit.prevent="handleEnterKey">
     <!-- 輸入框 -->
-     <div>
+    <div class="flex-grow">
       <input
-      type="text"
-      v-model="keyword"
-      id="keyword"
-      placeholder="美食分類、餐廳"
-      class="w-40 md:w-full text-amber-500 placeholder-amber-300 px-2 py-1 outline-none"
-    />
-     </div>
+        type="text"
+        v-model="keyword"
+        id="keyword"
+        placeholder="美食分類、餐廳"
+        class="w-full text-amber-500 placeholder-amber-300 px-2 py-1 outline-none"
+      />
+    </div>
     
     <!-- 桌面版餐廳圖示 -->
     <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500 md:block hidden" />
     
     <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
 
-    <!-- 地區選擇框 (桌面版) -->
-    <div class="hidden md:flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
+    <!-- 地區選擇框 -->
+    <div class="flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
       <select 
-      class="outline-none" 
-      v-model="selectedDistrict" 
-      id="district"
+        class="outline-none" 
+        v-model="selectedDistrict" 
+        id="district"
       >
         <option class="bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
-          {{ district}}
+          {{ district }}
         </option>
       </select>
     </div>
     
     <!-- 地圖圖示 -->
-    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500 md:block hidden" />
+    <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="w-5 h-5 text-amber-500" />
     
     <!-- 搜尋按鈕 -->
     <button
-      class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none ml-52 cursor-pointer">
+      class="px-4 py-1 text-white rounded-full shadow-md bg-amber-500 focus:outline-none cursor-pointer">
       <font-awesome-icon :icon="['fas', 'search']" class="w-4 h-4" />
     </button>
   </form>

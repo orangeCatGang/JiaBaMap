@@ -228,9 +228,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <Header />
-    <div class="max-w-4xl mx-auto mt-8 px-4 md:px-0">
+  <div class="">
+    <div class="max-w-4xl mx-auto md:mt-14 mt-16 px-4 md:px-0 ">
       <article 
         v-for="article in publishedArticles" 
         :key="article.id"

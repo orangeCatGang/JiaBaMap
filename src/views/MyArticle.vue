@@ -69,9 +69,8 @@ const editArticle = (id) => {
 </script>
 
 <template>
-  <div>
-    <Header />
-    <div class="min-h-screen bg-gray-50">
+  <div class="pt-16">
+    <div class="min-h-screen bg-white">
       <div class="max-w-4xl mx-auto mt-8 px-4">
         <h2 class="text-5xl font-extrabold mb-6">您的文章</h2>
         
