@@ -26,6 +26,20 @@ const handleEnterKey = () => {
     alert("請輸入有效關鍵字!!!")  
   }
 }
+const myLocation = computed(() => {
+  return "我的位置" in districts.value ? ["我的位置"] : [];
+});
+const singleCities = computed(() => {
+      return Object.entries(districts.value).filter(
+        ([key, value]) => value && value.lat // 單一縣市 (有 lat 和 lng 的資料)
+      );
+    });
+
+    const multiCities = computed(() => {
+      return Object.entries(districts.value).filter(
+        ([key, value]) => value && typeof value === "object" && !value.lat // 多行政區縣市 (包含子行政區)
+      );
+    });
 
 watch(
   () =>
@@ -61,7 +75,7 @@ watch(
     <font-awesome-icon :icon="['fas', 'utensils']" class="w-5 h-5 text-amber-500 md:block hidden" />
     
     <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
-
+    
     <!-- 地區選擇框 (桌面版) -->
     <div class="hidden md:flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
       <select 
@@ -69,10 +83,38 @@ watch(
       v-model="selectedDistrict" 
       id="district"
       >
-        <option class="bg-white" v-for="(coords, district) in districts" :key="district" :value="district">
-          {{ district}}
+      <option 
+    v-for="location in myLocation" 
+    :key="location" 
+    :value="location"
+  >
+    {{ location }}
+  </option>
+      <!-- 含多行政區的縣市 -->
+      <optgroup 
+        v-for="([city, subDistricts]) in multiCities" 
+        :key="city" 
+        :label="city"
+      >
+        <option 
+          v-for="(coords, subDistrict) in subDistricts" 
+          :key="subDistrict" 
+          :value="subDistrict"
+        >
+          {{ subDistrict }}
         </option>
-      </select>
+      </optgroup>
+  <!-- 單一縣市 -->
+  <option 
+    v-for="([city, coords]) in singleCities" 
+    :key="city" 
+    :value="city"
+  >
+    {{ city }}
+  </option>
+
+</select>
+
     </div>
     
     <!-- 地圖圖示 -->

@@ -1,10 +1,16 @@
 <script>
   import { ref, onMounted, onUnmounted, } from "vue";
   import SearchInput from "./SearchInput.vue";
+  import Login from '../components/Login.vue';
+  import { useAuth } from '../stores/authStore';
+
+
 
   export default {
     components: {
-      SearchInput
+      SearchInput,
+      Login,
+      useAuth,
     },
     setup() {
       // 控制選單開關的狀態
@@ -31,7 +37,19 @@
           isMenuOpen.value = false; // 點擊外部時關閉選單
         }
       };
-     
+      const showLoginModal = ref(false); // 是否顯示登錄小畫面
+
+      // 開啟登錄小畫面
+      const openLoginModal = () => {
+        showLoginModal.value = true;
+      };
+
+      // 關閉登錄小畫面
+      const closeLoginModal = () => {
+        showLoginModal.value = false;
+      };
+
+      const user = useAuth();
       
       // 在元件掛載和卸載時設置和移除事件監聽器
       onMounted(() => {
@@ -49,6 +67,10 @@
         isMenuOpen,
         toggleMenu,
         menuContainer,
+        showLoginModal,
+        openLoginModal,
+        closeLoginModal,
+        user
       };
     },
   };
@@ -57,6 +79,7 @@
   
   <template>
       <!-- 頁頭（導航欄） -->
+      <Login :visible="showLoginModal" @close="closeLoginModal" />
       <header class="flex flex-wrap items-center justify-between p-2 space-x-4 space-y-2 border-b border-orange-200 md:space-y-0">
           <!-- LOGO -->
           <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
@@ -66,6 +89,12 @@
             </div>
           <!-- 主選單 -->
           <div class="items-center space-x-4 md:flex main-menu">
+            <button v-if="!user.userData" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">
+                    登入
+            </button> 
+            <button v-else class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="user.logout">
+                    登出
+            </button> 
             <router-link to="/myarticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
                     發表食記
             </router-link> 

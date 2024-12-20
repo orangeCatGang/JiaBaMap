@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import loader from "../components/googleMapsLoader";
 import StoreType from "../components/HomePage/StoreType.vue"
 import SearchInput from "../components/SearchInput.vue";
-
+import { useAuth } from "../stores/authStore";
 import Login from '../components/Login.vue';
 
 // Local Storage 工具方法
@@ -61,6 +61,7 @@ export default {
     const closeLoginModal = () => {
       showLoginModal.value = false;
     };
+    const user = useAuth()
 
     // 在元件掛載和卸載時設置和移除事件監聽器
     onMounted(() => {
@@ -79,7 +80,8 @@ export default {
       menuContainer,
       showLoginModal,
       openLoginModal,
-      closeLoginModal
+      closeLoginModal,
+      user
     };
   },
   data() {
@@ -190,7 +192,12 @@ export default {
         <router-link to="/"><img src="../assets/logo.jpg" alt="Logo" class="w-[130px]"></router-link>
         <!-- 主選單 -->
           <div class="items-center md:flex main-menu">
-            <button  class="p-2 mr-4 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">點擊登入</button>
+            <button v-if="!user.userData" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="openLoginModal">
+                    登入
+            </button>
+            <button v-else class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20" @click="user.logout">
+                    登出
+            </button>
             <router-link to="/MyArticle" class="p-2 rounded-md text-amber-500 hover:bg-amber-100 min-w-20">
                     發表食記
             </router-link> 
