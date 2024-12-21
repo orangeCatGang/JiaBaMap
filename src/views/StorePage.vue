@@ -222,7 +222,7 @@ document.addEventListener('click', handleDocumentClick);
                 <div class="space-y-2 text-center md:text-left">
                     <h2 class="py-1 text-3xl font-black text-gray-700">{{ storeName }}</h2>
                     <div class="flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                        <span class="px-2 py-1 rounded text-yellow-50 bg-amber-500">{{ rating }} ★</span>
+                        <span class="px-2 py-1 rounded-2xl text-yellow-50 bg-orange-600">{{ rating }} ★</span>
                         <a href="#"><span class="text-gray-400">{{ userRatingCount }}則評論</span></a>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 py-2 md:justify-start">
