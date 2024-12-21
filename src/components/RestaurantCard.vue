@@ -1,6 +1,6 @@
 <template>
-  <div class="box-border w-full md:w-1/2 pt-2 h-screen overflow-y-auto">
-    <div class="flex top-16 flex-col bg-white box-border w-full space-x-0 md:top-6 z-50">
+  <div class="box-border w-full md:w-1/2 h-screen overflow-y-auto">
+    <div class="flex flex-col bg-white box-border w-full space-x-0 z-50 sticky top-0 pb-3">
       <div class="flex flex-col">
         <div class="p-3 font-bold text-gray-500">
           <h3>台灣『美食餐廳』 | 精選TOP 15間熱門店家</h3>
@@ -94,8 +94,8 @@
     v-for="place in Search.filteredResult" 
     :key="place.id"
     :data-place-id="place.id"
-    class="flex pt-1 items-center pb-2 border-b transition-colors duration-200"
-    :class="{ 'bg-amber-200': restaurantStore.hoveredPlaceId === place.id }"
+    class="flex py-1 items-center border-b transition-colors duration-200"
+    :class="{ 'bg-amber-100': restaurantStore.hoveredPlaceId === place.id }"
     @mouseenter="handleMouseEnter(place.id)"
     @mouseleave="handleMouseLeave">
       <div class="w-40 h-32 ml-3">
@@ -104,14 +104,14 @@
       <div class="flex flex-col justify-between ml-3 sm:text-xl w-4/5">
         <div class="ml-3">
           <h2 class="font-bold text-gray-500 text-base">
-            <a href="#" class="text-amber-500 hover:text-orange-300" @click="StoreId(place.id)">{{ place.name }}</a>
+            <a href="#" class="text-amber-500 hover:text-orange-500 " @click="StoreId(place.id)">{{ place.name }}</a>
           </h2>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
-          <div class="bg-red-600 mr-2 rounded-2xl text-white px-2 items-center">
+          <div class="bg-orange-600 mr-2 rounded-2xl text-white px-2 py-1 items-center">
             <p>{{ place.rating }} <font-awesome-icon :icon="['fas', 'star']" /></p>
           </div>
-          <p class="mr-2 font-light">(評論數: {{ place.userRatingCount }})</p>
+          <p class="mr-2 flex items-center font-light">(評論數: {{ place.userRatingCount }})</p>
         </div>
         <div class="flex mt-3 ml-3 text-xs">
           <p class="mr-2 font-light">平均消費 {{ place.startPrice}} ~ {{ place.endPrice}} 元</p>
@@ -123,16 +123,9 @@
               :icon="['fas' ,'circle']" 
               :style="{color:place?.openNow ? 'green' : 'gray', fontSize:'8px', margin:'2px'}" />
           </span>
-          <p> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
+          <p class="font-bold ml-1"> {{ place?.openNow ? '營業中' : '已打烊' }}</p>
         </div>
         <div class="mt-3 ml-3 flex flex-wrap items-center">
-        <span>
-          <a href="#" 
-            class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
-            <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" class="text-orange-400"/>
-                相似餐廳
-          </a>
-        </span>
         <span>
           <a href="#" 
             class="hidden md:block bg-gray-200 rounded-full px-3 py-1 text-sm mr-2 mb-1 items-center">
