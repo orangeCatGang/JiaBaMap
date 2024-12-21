@@ -1,58 +1,56 @@
-<script>
-  import { ref, onMounted, onUnmounted, } from "vue";
-  import SearchInput from "./SearchInput.vue";
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import SearchInput from "./SearchInput.vue";
+import { useAuth } from '@/stores/authStore';
 
-  export default {
-    components: {
-      SearchInput
-    },
-    setup() {
-      // 控制選單開關的狀態
-      const isMenuOpen = ref(false);
-      const menuContainer = ref(null);
-  
-      const toggleMenu = () => {
-        isMenuOpen.value = !isMenuOpen.value;
-        if (isMenuOpen.value) {
-          document.addEventListener('click', handleClickOutside);
-        } else {
-          document.removeEventListener('click', handleClickOutside);
-        }
-      };
-  
-      const checkScreenWidth = () => {
-        if (window.innerWidth > 768) {
-          isMenuOpen.value = false; // 自動關閉選單
-        }
-      };
-  
-      const handleClickOutside = (event) => {
-        if (menuContainer.value && !menuContainer.value.contains(event.target)) {
-          isMenuOpen.value = false; // 點擊外部時關閉選單
-        }
-      };
-     
-      
-      // 在元件掛載和卸載時設置和移除事件監聽器
-      onMounted(() => {
-        window.addEventListener("resize", checkScreenWidth);
-        document.addEventListener('click', handleClickOutside);
-  
-      });
-  
-      onUnmounted(() => {
-        window.removeEventListener("resize", checkScreenWidth);
-        document.removeEventListener('click', handleClickOutside);
-      });
-  
-      return {
-        isMenuOpen,
-        toggleMenu,
-        menuContainer,
-      };
-    },
-  };
-  </script>
+const user = useAuth();
+
+// 控制選單開關的狀態
+const isMenuOpen = ref(false);
+const menuContainer = ref(null);
+
+// 切換選單開關
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+
+  // 選單開啟時添加點擊監聽器，關閉時移除監聽器
+  if (isMenuOpen.value) {
+    document.addEventListener('click', handleClickOutside);
+  } else {
+    document.removeEventListener('click', handleClickOutside);
+  }
+};
+
+// 確認螢幕寬度變化來關閉選單
+const checkScreenWidth = () => {
+  if (window.innerWidth > 768) {
+    isMenuOpen.value = false; // 自動關閉選單
+  }
+};
+
+// 處理點擊選單外部區域關閉選單
+const handleClickOutside = (event) => {
+  if (menuContainer.value && !menuContainer.value.contains(event.target)) {
+    isMenuOpen.value = false; // 點擊外部時關閉選單
+  }
+};
+
+// 頭像的計算屬性
+const currentProfilePicture = computed(() => {
+    return user.userData?.picture || '/src/assets/default_user.png'; // 使用預設圖片
+});
+
+// 在元件掛載和卸載時設置和移除事件監聽器
+onMounted(() => {
+  window.addEventListener("resize", checkScreenWidth);
+  document.addEventListener('click', handleClickOutside); // 確保初始狀態監聽點擊事件
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkScreenWidth);
+  document.removeEventListener('click', handleClickOutside); // 移除監聽器
+});
+</script>
   
   
   <template>
@@ -102,7 +100,7 @@
               <!-- 會員頭貼 -->
               <div class="relative inline-block text-left group">
                 <div class="w-10 h-10 rounded-full cursor-pointer bg-slate-400">
-                  <img src="/src/assets/default_user.png" alt="avatar">
+                  <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover rounded-full">
                 </div>
                 <!-- 會員下拉選單 -->
                 <div class="absolute right-0 z-10 hidden w-32 mt-0 bg-white rounded-md shadow-md group-hover:block">
@@ -139,9 +137,9 @@
                 <ul class="flex flex-col mt-2">
                   <li href="#" class="flex cursor-pointer align-center">
                       <div class="w-10 h-10 ml-2 rounded-full bg-slate-400">
-                        <img src="/src/assets/default_user.png" alt="avatar">
+                        <img :src="currentProfilePicture" alt="avatar" class="w-full h-full object-cover rounded-full">
                       </div>
-                      <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">Julie Wang</router-link>
+                      <router-link to="/user" class="pl-4 font-bold leading-10 text-amber-500">{{ user.userData?.name || '使用者' }}</router-link>
                     </li>
                     <hr class="mt-2 border-amber-200">
                     <li><a href="#" class="block p-2 text-amber-500 hover:bg-amber-100">月排行</a></li>
