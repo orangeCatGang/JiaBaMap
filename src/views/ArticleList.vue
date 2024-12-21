@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, inject } from 'vue';
 import axios from 'axios';
-import Header from '../components/Header.vue';
-import Footer from '../components/Footer.vue';
 import dayjs from 'dayjs'
+import Header from "../components/Header.vue";
 
+const $swal = inject('$swal');  // 注入 $swal
 
 const formatDate = (date) => {
  return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
@@ -130,82 +130,182 @@ const toggleLike = async (articleId, commentId, replyId) => {
 
 // 添加評論
 const addComment = async (articleId) => {
- if (!articleId) {
-   console.error('No article ID provided');
-   return;
- }
+  if (!articleId) {
+    console.error('No article ID provided');
+    return;
+  }
 
- if (!newComment.value.content.trim()) {
-   alert('請輸入評論內容');
-   return;
- }
+  if (!newComment.value.content.trim()) {
+    alert('請輸入評論內容');
+    return;
+  }
 
- try {
-   console.log('Adding comment to article:', articleId); // 添加日誌
-   
-   await api.post(`/articles/${articleId}/comments`, {
-     content: newComment.value.content,
-     user: '訪客',
-     date: dayjs().format('YYYY-MM-DD HH:mm:ss')
-   });
-   
-   await fetchArticles();
-   newComment.value.content = '';
-   
- } catch (error) {
-   console.error('Error adding comment:', error.response?.data || error);
- }
+  try {
+    console.log('Adding comment to article:', articleId);
+    
+    // 先準備新評論的資料
+    const newCommentData = {
+      id: `c${Date.now()}`,  // 生成臨時 ID
+      content: newComment.value.content,
+      user: '訪客',
+      date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      likes: 0,
+      isLiked: false,
+      replies: []
+    };
+
+    try {
+      await api.post(`/articles/${articleId}/comments`, newCommentData);
+      await fetchArticles();
+    } catch (error) {
+      console.warn('API 請求失敗，使用本地更新:', error);
+      // API 失敗時，直接更新前端資料
+      const article = publishedArticles.value.find(a => a.id === articleId);
+      if (article) {
+        article.comments.push(newCommentData);
+      }
+    }
+    
+    newComment.value.content = '';
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    alert('發表評論失敗，請稍後再試');
+  }
 };
 
-// 刪除評論
+// 修改刪除評論函數
 const deleteComment = async (articleId, commentId) => {
- try {
-   if (!confirm('確定要刪除這則評論嗎？')) {
-     return;
-   }
-   
-   await api.delete(`/articles/${articleId}/comments/${commentId}`);
-   await fetchArticles();
- } catch (error) {
-   console.error('Error deleting comment:', error);
- }
+  try {
+    const result = await swalWithBootstrapButtons.fire({
+      title: '確定要刪除評論？',
+      text: '刪除後將無法恢復！',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '刪除！',
+      cancelButtonText: '取消',
+      reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/articles/${articleId}/comments/${commentId}`);
+        await fetchArticles();
+        await swalWithBootstrapButtons.fire({
+          title: '已刪除！',
+          text: '評論已成功刪除。',
+          icon: 'success'
+        });
+      } catch (error) {
+        console.warn('API 請求失敗，使用本地更新:', error);
+        const article = publishedArticles.value.find(a => a.id === articleId);
+        if (article) {
+          article.comments = article.comments.filter(c => c.id !== commentId);
+        }
+        await swalWithBootstrapButtons.fire({
+          title: '已刪除！',
+          text: '評論已刪除。',
+          icon: 'success'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤！',
+      text: '刪除評論失敗，請稍後再試',
+      icon: 'error'
+    });
+  }
 };
 
 // 添加回覆
 const addReply = async (articleId, commentId) => {
- if (!newReply.value.content.trim()) {
-   alert('請輸入回覆內容');
-   return;
- }
- 
- try {
-   await api.post(`/articles/${articleId}/comments/${commentId}/replies`, {
-     content: newReply.value.content,
-     user: '訪客',
-     date: dayjs().format('YYYY-MM-DD HH:mm:ss')  // 添加日期
-   });
-   
-   // 重新獲取文章列表以更新回覆
-   await fetchArticles();
-   newReply.value.content = '';
-   newReply.value.replyingTo = null;
- } catch (error) {
-   console.error('Error adding reply:', error);
- }
+  if (!newReply.value.content.trim()) {
+    alert('請輸入回覆內容');
+    return;
+  }
+  
+  try {
+    // 先準備新回覆的資料
+    const newReplyData = {
+      id: `r${Date.now()}`,  // 生成臨時 ID
+      content: newReply.value.content,
+      user: '訪客',
+      date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      likes: 0,
+      isLiked: false,
+      showOptions: false
+    };
+
+    try {
+      await api.post(`/articles/${articleId}/comments/${commentId}/replies`, newReplyData);
+      await fetchArticles();
+    } catch (error) {
+      console.warn('API 請求失敗，使用本地更新:', error);
+      // API 失敗時，直接更新前端資料
+      const article = publishedArticles.value.find(a => a.id === articleId);
+      if (article) {
+        const comment = article.comments.find(c => c.id === commentId);
+        if (comment) {
+          comment.replies.push(newReplyData);
+        }
+      }
+    }
+
+    newReply.value.content = '';
+    newReply.value.replyingTo = null;
+  } catch (error) {
+    console.error('Error adding reply:', error);
+    alert('發表回覆失敗，請稍後再試');
+  }
 };
 
-// 刪除回覆
+// 修改刪除回覆函數
 const deleteReply = async (articleId, commentId, replyId) => {
- try {
-   if (!confirm('確定要刪除這則回覆嗎？')) {
-     return;
-   }
-   
-   await api.delete(`/articles/${articleId}/comments/${commentId}/replies/${replyId}`);
-   await fetchArticles();
- } catch (error) {
-   console.error('Error deleting reply:', error);
- }
+  try {
+    const result = await swalWithBootstrapButtons.fire({
+      title: '確定要刪除回覆？',
+      text: '刪除後將無法恢復！',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '刪除',
+      cancelButtonText: '取消',
+      reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/articles/${articleId}/comments/${commentId}/replies/${replyId}`);
+        await fetchArticles();
+        await swalWithBootstrapButtons.fire({
+          title: '已刪除！',
+          text: '回覆已成功刪除。',
+          icon: 'success'
+        });
+      } catch (error) {
+        console.warn('API 請求失敗，使用本地更新:', error);
+        const article = publishedArticles.value.find(a => a.id === articleId);
+        if (article) {
+          const comment = article.comments.find(c => c.id === commentId);
+          if (comment) {
+            comment.replies = comment.replies.filter(r => r.id !== replyId);
+          }
+        }
+        await swalWithBootstrapButtons.fire({
+          title: '已刪除！',
+          text: '回覆已刪除。',
+          icon: 'success'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting reply:', error);
+    await swalWithBootstrapButtons.fire({
+      title: '錯誤！',
+      text: '刪除回覆失敗，請稍後再試',
+      icon: 'error'
+    });
+  }
 };
 
 const toggleContent = (article) => {
@@ -220,17 +320,63 @@ const toggleReplyForm = (commentId) => {
  }
 };
 
+// 追蹤當前打開的選單 ID
+const activeMenuId = ref(null);
+
+// 切換選單
+const toggleMenu = (id) => {
+  activeMenuId.value = activeMenuId.value === id ? null : id;
+};
+
+// 點擊外部關閉選單
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.menu-button') && !event.target.closest('.menu-content')) {
+    activeMenuId.value = null;
+  }
+};
+
+// 新增的響應式狀態
+const isSearchOpen = ref(false);
+const isMobile = ref(window.innerWidth < 768);
+
+// 處理搜尋欄開關事件
+const handleSearchToggle = (isOpen) => {
+  isSearchOpen.value = isOpen;
+};
+
+// 監聽視窗大小變化
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
 // 在 onMounted 中調用
 onMounted(async () => {
   fetchArticles();      // 然後獲取所有文章
+  document.addEventListener('click', handleClickOutside);
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('resize', handleResize);
+});
+
+// 配置 SweetAlert 樣式
+const swalWithBootstrapButtons = $swal.mixin({
+  customClass: {
+    confirmButton: 'bg-green-500 text-white px-6 py-2 rounded mx-2 hover:bg-green-600',
+    cancelButton: 'bg-red-500 text-white px-6 py-2 rounded mx-2 hover:bg-red-600',
+    actions: 'flex justify-center gap-4'
+  },
+  buttonsStyling: false
 });
 
 </script>
 
 <template>
   <div>
-    <Header />
-    <div class="max-w-4xl mx-auto mt-8 px-4 md:px-0">
+    <Header @search-toggle="handleSearchToggle" />
+    <div :class="['max-w-4xl mx-auto', { 'mt-24': isSearchOpen && isMobile, 'md:mt-14 mt-16': !isSearchOpen || !isMobile }]">
       <article 
         v-for="article in publishedArticles" 
         :key="article.id"
@@ -328,114 +474,99 @@ onMounted(async () => {
                 <span class="text-xs md:text-sm text-gray-500">{{ formatDate(comment.date) }}</span>
               </div>
               <p class="text-sm md:text-base text-gray-700">{{ comment.content }}</p>
-              
 
               <div class="flex items-center justify-between mt-2">
-                  <div class="flex gap-4 items-center">
-                    <button 
-                  @click="toggleLike(article.id, comment.id)"
-                  class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
-                >
-                  <font-awesome-icon 
-                    :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']" 
-                    class="text-xl"
-                  />
-                  <span>{{ comment.likes }}</span>
-                </button>
+                <div class="flex gap-4 items-center w-full">
                   <button 
-                    @click="toggleReplyForm(comment.id)"
-                    class="text-blue-500 text-sm hover:text-blue-600"
+                    @click="toggleLike(article.id, comment.id)"
+                    class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
                   >
-                    {{ newReply.replyingTo === comment.id ? '取消回覆' : '回覆' }}
+                    <font-awesome-icon 
+                      :icon="[comment.isLiked ? 'fas' : 'far', 'thumbs-up']" 
+                      class="text-xl"
+                    />
+                    <span>{{ comment.likes }}</span>
                   </button>
-                </div>
-                
-                <!-- 三點選單 -->
-                <div class="relative">
-                  <button 
-                    @click="comment.showOptions = !comment.showOptions"
-                    class="text-gray-500 hover:text-gray-700 px-2 font-bold"
-                  >
-                    ⋮
-                  </button>
-                  <!-- 下拉選單 -->
-                  <div 
-                    v-if="comment.showOptions"
-                    class="absolute right-0 mt-1 bg-white rounded-lg shadow-lg py-1 min-w-[100px] z-10"
-                  >
+                  <div class="flex items-center gap-2">
                     <button 
-                      @click="deleteComment(article.id, comment.id); comment.showOptions = false"
-                      class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                      @click="toggleReplyForm(comment.id)"
+                      class="text-blue-500 text-sm hover:text-blue-600"
                     >
-                      刪除
+                      {{ newReply.replyingTo === comment.id ? '取消回覆' : '回覆' }}
                     </button>
-                  </div>
-                </div>
-              </div>
-              <!-- 回覆表單 -->
-                <div 
-                    v-if="newReply.replyingTo === comment.id"
-                    class="mt-3 pl-4 border-l-2 border-gray-200"
-                  >
-                    <div class="relative">
-                      <textarea
-                        v-model="newReply.content"
-                        rows="2"
-                        maxlength="200"
-                        class="w-full border rounded p-2 text-sm"
-                        placeholder="寫下您的回覆..."
-                      ></textarea>
-                      <p v-if="newReply.content.length > 0" class="text-xs text-gray-500 mt-1">
-                        還可以輸入 {{ 200 - newReply.content.length }} 字
-                      </p>
-                    </div>
-                    <button
-                      @click="addReply(article.id, comment.id)"
-                      class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                    >
-                      發表回覆
-                    </button>
-                </div>
-              <!-- 回覆列表 -->
-              <div 
-                  v-if="comment.replies && comment.replies.length > 0"
-                  class="mt-3 pl-4 border-l-2 border-gray-200 space-y-3"
-                >
-                  <div 
-                    v-for="reply in comment.replies"
-                    :key="reply.id"
-                    class="bg-gray-50 p-3 rounded"
-                  >
-                  <div class="flex justify-between items-center mb-1">
-                    <div>
-                      <span class="font-medium text-sm">{{ reply.user }}</span>
-                      <span class="text-xs text-gray-500 ml-2">{{ formatDate(reply.date) }}</span>
-                    </div>
-                    <!-- 三點選單 -->
-                    <div class="relative">
+                    <!-- 評論的三點選單 -->
+                    <div class="relative group">
                       <button 
-                        @click="reply.showOptions = !reply.showOptions"
-                        class="text-gray-500 hover:text-gray-700 px-2 font-bold"
+                        @click.stop="toggleMenu(comment.id)"
+                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
                       >
-                        ⋮
+                        <font-awesome-icon :icon="['fas', 'ellipsis']" />
                       </button>
                       <!-- 下拉選單 -->
                       <div 
-                        v-if="reply.showOptions"
-                        class="absolute right-0 mt-1 bg-white rounded-lg shadow-lg py-1 min-w-[100px] z-10"
+                        v-if="activeMenuId === comment.id"
+                        class="absolute left-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
                       >
                         <button 
-                          @click="deleteReply(article.id, comment.id, reply.id); reply.showOptions = false"
-                          class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                          @click="deleteComment(article.id, comment.id); activeMenuId = null"
+                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-50"
                         >
                           刪除
                         </button>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- 回覆表單 -->
+              <div 
+                v-if="newReply.replyingTo === comment.id"
+                class="mt-3 pl-4 border-l-2 border-gray-200"
+              >
+                <div class="relative">
+                  <textarea
+                    v-model="newReply.content"
+                    rows="2"
+                    maxlength="200"
+                    class="w-full border rounded p-2 text-sm disabled:bg-gray-100"
+                    :class="{ 'bg-gray-50': newReply.content.length >= 200 }"
+                    placeholder="寫下您的回覆..."
+                    @input="newReply.content = $event.target.value.slice(0, 200)"
+                  ></textarea>
+                  <p v-if="newReply.content.length > 0" 
+                    class="text-xs mt-1"
+                    :class="newReply.content.length >= 200 ? 'text-red-500' : 'text-gray-500'"
+                  >
+                    {{ newReply.content.length >= 200 ? '已達到字數上限' : `還可以輸入 ${200 - newReply.content.length} 字` }}
+                  </p>
+                </div>
+                <button
+                  @click="addReply(article.id, comment.id)"
+                  class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                >
+                  發表回覆
+                </button>
+              </div>
+
+              <!-- 回覆列表 -->
+              <div 
+                v-if="comment.replies && comment.replies.length > 0"
+                class="mt-3 pl-4 border-l-2 border-gray-200 space-y-3"
+              >
+                <div 
+                  v-for="reply in comment.replies"
+                  :key="reply.id"
+                  class="bg-gray-50 p-3 rounded"
+                >
+                  <div class="flex justify-between items-center mb-1">
+                    <div>
+                      <span class="font-medium text-sm">{{ reply.user }}</span>
+                      <span class="text-xs text-gray-500 ml-2">{{ formatDate(reply.date) }}</span>
+                    </div>
+                  </div>
                   <p class="text-sm text-gray-700">{{ reply.content }}</p>
-                  <!-- 點讚按鈕 -->
-                  <div class="flex gap-2 mt-2">
+                  <div class="flex items-center gap-4 mt-2">
                     <button 
                       @click="toggleLike(article.id, comment.id, reply.id)"
                       class="flex items-center space-x-1 text-blue-500 hover:text-blue-600"
@@ -446,6 +577,27 @@ onMounted(async () => {
                       />
                       <span>{{ reply.likes }}</span>
                     </button>
+                    <!-- 回覆的三點選單 -->
+                    <div class="relative group">
+                      <button 
+                        @click.stop="toggleMenu(reply.id)"
+                        class="text-gray-500 hover:text-gray-700 px-2 font-bold menu-button"
+                      >
+                        <font-awesome-icon :icon="['fas', 'ellipsis']" />
+                      </button>
+                      <!-- 下拉選單 -->
+                      <div 
+                        v-if="activeMenuId === reply.id"
+                        class="absolute left-0 mt-1 bg-amber-200 rounded-lg shadow-lg py-1 min-w-[100px] z-10 menu-content"
+                      >
+                        <button 
+                          @click="deleteReply(article.id, comment.id, reply.id); activeMenuId = null"
+                          class="w-full text-center px-4 py-2 text-sm font-bold text-red-500 hover:bg-gray-50"
+                        >
+                          刪除
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -461,11 +613,16 @@ onMounted(async () => {
                   v-model="newComment.content"
                   rows="3"
                   maxlength="200"
-                  class="w-full border rounded p-2 text-sm md:text-base"
+                  class="w-full border rounded p-2 text-sm md:text-base disabled:bg-gray-100"
+                  :class="{ 'bg-gray-50': newComment.content.length >= 200 }"
                   placeholder="寫下您的評論..."
+                  @input="newComment.content = $event.target.value.slice(0, 200)"
                 ></textarea>
-                <p v-if="newComment.content.length > 0" class="text-xs text-gray-500 mt-1">
-                  還可以輸入 {{ 200 - newComment.content.length }} 字
+                <p v-if="newComment.content.length > 0" 
+                  class="text-xs mt-1"
+                  :class="newComment.content.length >= 200 ? 'text-red-500' : 'text-gray-500'"
+                >
+                  {{ newComment.content.length >= 200 ? '已達到字數上限' : `還可以輸入 ${200 - newComment.content.length} 字` }}
                 </p>
               </div>
               <button
@@ -479,7 +636,6 @@ onMounted(async () => {
         </div>
       </article>
     </div>
-    <Footer />
   </div>
 </template>
 

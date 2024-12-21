@@ -23,7 +23,7 @@ const routes = [
     path: '/user',
     name: 'user',
     component: UserProfile,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
   {
     path: '/search',
@@ -39,6 +39,7 @@ const routes = [
     path: '/myarticle',
     name: 'myArticle',
     component: MyArticle,
+    meta: { requiresAuth: false },
   },
   {
     path: '/articlelist',

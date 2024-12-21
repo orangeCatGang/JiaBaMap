@@ -28,7 +28,9 @@
     "pinia": "^2.2.6",
     "tailwind-scrollbar-hide": "^1.1.7",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue-sweetalert2": "^5.0.11",
+    "vue3-carousel": "^0.10.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
