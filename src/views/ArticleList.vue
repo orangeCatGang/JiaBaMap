@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, inject } from 'vue';
 import axios from 'axios';
 import dayjs from 'dayjs'
+import Header from "../components/Header.vue";
 
 const $swal = inject('$swal');  // 注入 $swal
 
@@ -334,14 +335,30 @@ const handleClickOutside = (event) => {
   }
 };
 
+// 新增的響應式狀態
+const isSearchOpen = ref(false);
+const isMobile = ref(window.innerWidth < 768);
+
+// 處理搜尋欄開關事件
+const handleSearchToggle = (isOpen) => {
+  isSearchOpen.value = isOpen;
+};
+
+// 監聽視窗大小變化
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
 // 在 onMounted 中調用
 onMounted(async () => {
   fetchArticles();      // 然後獲取所有文章
   document.addEventListener('click', handleClickOutside);
+  window.addEventListener('resize', handleResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('resize', handleResize);
 });
 
 // 配置 SweetAlert 樣式
@@ -357,8 +374,9 @@ const swalWithBootstrapButtons = $swal.mixin({
 </script>
 
 <template>
-  <div class="">
-    <div class="max-w-4xl mx-auto md:mt-14 mt-16 px-4 md:px-0 ">
+  <div>
+    <Header @search-toggle="handleSearchToggle" />
+    <div :class="['max-w-4xl mx-auto', { 'mt-24': isSearchOpen && isMobile, 'md:mt-14 mt-16': !isSearchOpen || !isMobile }]">
       <article 
         v-for="article in publishedArticles" 
         :key="article.id"

@@ -76,45 +76,43 @@ watch(
     
     <div class="h-full mx-2 -my-2 border-l border-gray-300"></div>
     
-    <!-- 地區選擇框 (桌面版) -->
-    <div class="hidden md:flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
+    <!-- 地區選擇框 (適用於桌面版和手機版) -->
+    <div class="flex items-center space-x-1 border-[1.5px] border-amber-100 text-amber-500 rounded-full px-3 py-1">
       <select 
         class="outline-none" 
         v-model="selectedDistrict" 
         id="district"
       >
-      <option 
-    v-for="location in myLocation" 
-    :key="location" 
-    :value="location"
-  >
-    {{ location }}
-  </option>
-      <!-- 含多行政區的縣市 -->
-      <optgroup 
-        v-for="([city, subDistricts]) in multiCities" 
-        :key="city" 
-        :label="city"
-      >
         <option 
-          v-for="(coords, subDistrict) in subDistricts" 
-          :key="subDistrict" 
-          :value="subDistrict"
+          v-for="location in myLocation" 
+          :key="location" 
+          :value="location"
         >
-          {{ subDistrict }}
+          {{ location }}
         </option>
-      </optgroup>
-  <!-- 單一縣市 -->
-  <option 
-    v-for="([city, coords]) in singleCities" 
-    :key="city" 
-    :value="city"
-  >
-    {{ city }}
-  </option>
-
-</select>
-
+        <!-- 含多行政區的縣市 -->
+        <optgroup 
+          v-for="([city, subDistricts]) in multiCities" 
+          :key="city" 
+          :label="city"
+        >
+          <option 
+            v-for="(coords, subDistrict) in subDistricts" 
+            :key="subDistrict" 
+            :value="subDistrict"
+          >
+            {{ subDistrict }}
+          </option>
+        </optgroup>
+        <!-- 單一縣市 -->
+        <option 
+          v-for="([city, coords]) in singleCities" 
+          :key="city" 
+          :value="city"
+        >
+          {{ city }}
+        </option>
+      </select>
     </div>
     
     <!-- 地圖圖示 -->

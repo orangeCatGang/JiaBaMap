@@ -1,83 +1,69 @@
-<script>
-  import { ref, onMounted, onUnmounted, computed } from "vue";
-  import SearchInput from "./SearchInput.vue";
-  import { useRoute } from "vue-router";
-  import Login from '../components/Login.vue';
-  import { useAuth } from '../stores/authStore';
+<script setup>
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import SearchInput from "./SearchInput.vue";
+import { useRoute } from "vue-router";
+import Login from '../components/Login.vue';
+import { useAuth } from '../stores/authStore';
 
-  export default {
-    components: {
-      SearchInput,
-      Login,
-    },
-    setup() {
-      const route = useRoute();
-      const showSearch = computed(() => {
-        return route.path !== '/';
-      });
+const emit = defineEmits(['search-toggle']);
+const route = useRoute();
+const user = useAuth();
 
-      const isMenuOpen = ref(false);
-      const menuContainer = ref(null);
-      const isSearchOpen = ref(false);
-  
-      const toggleMenu = () => {
-        isMenuOpen.value = !isMenuOpen.value;
-        if (isMenuOpen.value) {
-          document.addEventListener('click', handleClickOutside);
-        } else {
-          document.removeEventListener('click', handleClickOutside);
-        }
-      };
-  
-      const checkScreenWidth = () => {
-        if (window.innerWidth > 768) {
-          isMenuOpen.value = false;
-        }
-      };
-  
-      const handleClickOutside = (event) => {
-        if (menuContainer.value && !menuContainer.value.contains(event.target)) {
-          isMenuOpen.value = false;
-        }
-      };
-  
-      const toggleSearch = () => {
-        isSearchOpen.value = !isSearchOpen.value;
-      };
-  
-      const showLoginModal = ref(false);
-      const openLoginModal = () => {
-        showLoginModal.value = true;
-      };
-      const closeLoginModal = () => {
-        showLoginModal.value = false;
-      };
+// 響應式狀態
+const isMenuOpen = ref(false);
+const menuContainer = ref(null);
+const isSearchOpen = ref(false);
+const showLoginModal = ref(false);
 
-      const user = useAuth();
-      
-      onMounted(() => {
-        window.addEventListener("resize", checkScreenWidth);
-      });
-  
-      onUnmounted(() => {
-        window.removeEventListener("resize", checkScreenWidth);
-        document.removeEventListener('click', handleClickOutside);
-      });
-  
-      return {
-        isMenuOpen,
-        toggleMenu,
-        menuContainer,
-        isSearchOpen,
-        toggleSearch,
-        showSearch,
-        showLoginModal,
-        openLoginModal,
-        closeLoginModal,
-        user,
-      };
-    },
-  };
+// 計算屬性
+const showSearch = computed(() => route.path !== '/');
+
+// 事件處理函數
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+  if (isMenuOpen.value) {
+    document.addEventListener('click', handleClickOutside);
+  } else {
+    document.removeEventListener('click', handleClickOutside);
+  }
+};
+
+const handleClickOutside = (event) => {
+  if (menuContainer.value && !menuContainer.value.contains(event.target)) {
+    isMenuOpen.value = false;
+  }
+};
+
+const toggleSearch = () => {
+  isSearchOpen.value = !isSearchOpen.value;
+  emit('search-toggle', isSearchOpen.value);
+};
+
+const openLoginModal = () => showLoginModal.value = true;
+const closeLoginModal = () => showLoginModal.value = false;
+
+// 螢幕寬度檢查
+const checkScreenWidth = () => {
+  if (window.innerWidth > 768) {
+    isMenuOpen.value = false;
+  }
+};
+
+// 生命週期鉤子
+onMounted(() => {
+  window.addEventListener("resize", checkScreenWidth);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkScreenWidth);
+  document.removeEventListener('click', handleClickOutside);
+  isSearchOpen.value = false;
+});
+
+// 路由監聽
+watch(route, () => {
+  isSearchOpen.value = false;
+});
 </script>
 
 <template>
